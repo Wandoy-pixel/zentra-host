@@ -777,7 +777,20 @@ details.faq p { margin-top: 12px; color: var(--text-muted); font-size: 14px; }
     .domain-form { flex-direction: column; }
     .footer-bottom { flex-direction: column; gap: 16px; }
     .auth-form-side { padding: 40px 24px; }
+    .dash-main { padding: 16px; }
+    .dash-head h1 { font-size: 22px; }
+    .auth-card { padding: 32px 24px; }
 }
+/* Mobile: prevent iOS Safari auto-zoom on input focus (font-size must be >=16px) */
+@media (max-width: 768px) {
+    .form-group input, .form-group select, .form-group textarea,
+    .domain-form input, .domain-form select { font-size: 16px; }
+    .ck-card { padding: 20px; }
+}
+/* Wrap tables in dashboard-card to allow horizontal scroll on mobile */
+.dash-card table, .dash-section table { min-width: 600px; }
+.dash-card { overflow-x: auto; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1660,12 +1673,31 @@ function renderDomainPrices() {
 
 document.getElementById('domainSearchForm').addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = document.getElementById('domainInput').value.toLowerCase().trim();
+    const rawName = document.getElementById('domainInput').value.toLowerCase().trim();
     const ext = document.getElementById('domainExtension').value;
     const result = document.getElementById('domainResult');
-    if (!name) return;
-    const available = Math.random() > 0.3;
+    if (!rawName) return;
+
+    // Validasi karakter domain (lowercase alphanum + dash, 2-63 char)
+    if (!/^[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/.test(rawName) && rawName.length > 1) {
+        result.className = 'domain-result show unavailable';
+        result.innerHTML = `<strong>✗ Nama domain tidak valid</strong><br>Gunakan huruf kecil (a-z), angka, dan tanda hubung (-). Tidak boleh diawali/diakhiri dengan tanda hubung.`;
+        return;
+    }
+    if (rawName.length < 2) {
+        result.className = 'domain-result show unavailable';
+        result.innerHTML = `<strong>✗ Nama domain terlalu pendek</strong><br>Minimal 2 karakter.`;
+        return;
+    }
+
+    const name = rawName.replace(/[^a-z0-9-]/g, '');
+    // Hash deterministik supaya nama yang sama selalu hasil konsisten
+    let hash = 0;
+    const fullDomain = name + ext;
+    for (let i = 0; i < fullDomain.length; i++) hash = ((hash << 5) - hash + fullDomain.charCodeAt(i)) | 0;
+    const available = Math.abs(hash) % 3 !== 0; // ~67% tersedia
     const price = DOMAIN_PRICES_MAP[ext] || 100000;
+
     result.className = 'domain-result show';
     if (available) {
         result.classList.add('available');
@@ -1689,16 +1721,22 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
     const subject = document.getElementById('contactSubject').value;
     const message = document.getElementById('contactMessage').value.trim();
 
-    const { error } = await sb.from('messages').insert({
-        name, email, subject, message
-    });
-
-    if (error) {
-        showAlert('contactAlert', translateError(error), 'error');
-        return;
+    const btn = e.target.querySelector('button[type=submit]');
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Mengirim...';
+    try {
+        const { error } = await sb.from('messages').insert({ name, email, subject, message });
+        if (error) {
+            showAlert('contactAlert', translateError(error), 'error');
+            return;
+        }
+        showAlert('contactAlert', '✓ Pesan terkirim! Tim kami akan merespon dalam 1x24 jam.', 'success');
+        document.getElementById('contactForm').reset();
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = orig;
     }
-    showAlert('contactAlert', '✓ Pesan terkirim! Tim kami akan merespon dalam 1x24 jam.', 'success');
-    document.getElementById('contactForm').reset();
 });
 
 // === LOGIN TABS (Zentra / Admin) ===
@@ -1738,20 +1776,28 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const email = document.getElementById('loginEmail').value.trim().toLowerCase();
     const password = document.getElementById('loginPassword').value;
 
-    const { data, error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) {
-        showAlert('loginAlert', translateError(error), 'error');
-        return;
-    }
-    await refreshSession();
-    // Pastikan currentUser benar-benar ready (retry kalau koneksi lambat)
-    if (!currentUser) {
-        await new Promise(r => setTimeout(r, 500));
+    const btn = e.target.querySelector('button[type=submit]');
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Memproses...';
+    try {
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) {
+            showAlert('loginAlert', translateError(error), 'error');
+            return;
+        }
         await refreshSession();
+        if (!currentUser) {
+            await new Promise(r => setTimeout(r, 500));
+            await refreshSession();
+        }
+        const name = (currentUser && currentUser.fullname) || email;
+        showAlert('loginAlert', `Selamat datang, ${name}!`, 'success');
+        setTimeout(() => navigate('dashboard'), 600);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = orig;
     }
-    const name = (currentUser && currentUser.fullname) || email;
-    showAlert('loginAlert', `Selamat datang, ${name}!`, 'success');
-    setTimeout(() => navigate('dashboard'), 600);
 });
 
 // === REGISTER ===
@@ -1764,29 +1810,41 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     const confirm = document.getElementById('regConfirm').value;
 
     if (password !== confirm) {
-        showAlert('registerAlert', 'Password dan konfirmasi tidak sama!');
+        showAlert('registerAlert', 'Password dan konfirmasi tidak sama!', 'error');
+        return;
+    }
+    if (password.length < 6) {
+        showAlert('registerAlert', 'Password minimal 6 karakter!', 'error');
         return;
     }
 
-    const { data, error } = await sb.auth.signUp({
-        email,
-        password,
-        options: { data: { fullname, phone } }
-    });
+    const btn = e.target.querySelector('button[type=submit]');
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Memproses...';
+    try {
+        const { data, error } = await sb.auth.signUp({
+            email,
+            password,
+            options: { data: { fullname, phone } }
+        });
 
-    if (error) {
-        showAlert('registerAlert', translateError(error), 'error');
-        return;
-    }
+        if (error) {
+            showAlert('registerAlert', translateError(error), 'error');
+            return;
+        }
 
-    // Cek apakah session langsung aktif (email confirmation OFF) atau perlu verifikasi
-    if (data && data.session) {
-        await refreshSession();
-        showAlert('registerAlert', 'Akun berhasil dibuat! Mengalihkan ke dashboard...', 'success');
-        setTimeout(() => navigate('dashboard'), 1000);
-    } else {
-        showAlert('registerAlert', 'Akun berhasil dibuat! Silakan cek email Anda untuk verifikasi, lalu login.', 'success');
-        setTimeout(() => navigate('login'), 1500);
+        if (data && data.session) {
+            await refreshSession();
+            showAlert('registerAlert', 'Akun berhasil dibuat! Mengalihkan ke dashboard...', 'success');
+            setTimeout(() => navigate('dashboard'), 1000);
+        } else {
+            showAlert('registerAlert', 'Akun berhasil dibuat! Silakan cek email Anda untuk verifikasi, lalu login.', 'success');
+            setTimeout(() => navigate('login'), 1500);
+        }
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = orig;
     }
 });
 
@@ -1853,7 +1911,6 @@ function renderSummary() {
 
 document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    // Pastikan currentUser ada (refresh jika belum)
     if (!currentUser) await refreshSession();
     const user = getUser();
     if (!user) {
@@ -1864,30 +1921,41 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
         showAlert('checkoutAlert', 'Belum ada item yang dipilih. Silakan pilih paket dulu.', 'error');
         return;
     }
-    const period = PERIODS.find(p => p.months === selectedPeriod);
-    const subtotal = pendingOrder.price * (pendingOrder.type === 'domain' ? 1 : period.months);
-    const discount = pendingOrder.type === 'domain' ? 0 : subtotal * (period.discount / 100);
-    const ppn = (subtotal - discount) * 0.11;
-    const total = Math.round(subtotal - discount + ppn);
 
-    const payload = {
-        user_id: user.id,
-        name: pendingOrder.name,
-        type: pendingOrder.type,
-        period: selectedPeriod,
-        price: total,
-        payment: document.getElementById('ckPayment').value
-    };
+    // CRITICAL: disable button untuk anti-double-payment
+    const btn = e.target.querySelector('button[type=submit]');
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Memproses pembayaran...';
+    try {
+        const period = PERIODS.find(p => p.months === selectedPeriod);
+        const subtotal = pendingOrder.price * (pendingOrder.type === 'domain' ? 1 : period.months);
+        const discount = pendingOrder.type === 'domain' ? 0 : subtotal * (period.discount / 100);
+        const ppn = (subtotal - discount) * 0.11;
+        const total = Math.round(subtotal - discount + ppn);
 
-    const { data, error } = await sb.from('orders').insert(payload).select().single();
-    if (error) {
-        showAlert('checkoutAlert', translateError(error), 'error');
-        return;
+        const payload = {
+            user_id: user.id,
+            name: pendingOrder.name,
+            type: pendingOrder.type,
+            period: selectedPeriod,
+            price: total,
+            payment: document.getElementById('ckPayment').value
+        };
+
+        const { data, error } = await sb.from('orders').insert(payload).select().single();
+        if (error) {
+            showAlert('checkoutAlert', translateError(error), 'error');
+            return;
+        }
+        const invoiceNo = 'INV-' + String(data.id).padStart(6, '0');
+        showAlert('checkoutAlert', `<strong>✓ Pembayaran berhasil!</strong> Invoice <strong>${invoiceNo}</strong> dibuat. Layanan aktif. Mengalihkan ke dashboard...`, 'success');
+        pendingOrder = null;
+        setTimeout(() => navigate('dashboard'), 2200);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = orig;
     }
-    const invoiceNo = 'INV-' + String(data.id).padStart(6, '0');
-    showAlert('checkoutAlert', `<strong>✓ Pembayaran berhasil!</strong> Invoice <strong>${invoiceNo}</strong> dibuat. Layanan aktif. Mengalihkan ke dashboard...`, 'success');
-    pendingOrder = null;
-    setTimeout(() => navigate('dashboard'), 2200);
 });
 
 // === DASHBOARD ===
@@ -1993,7 +2061,7 @@ function renderProfile() {
     if (!user) return;
     const shortId = (user.id || '').toString().slice(0, 8);
     document.getElementById('profileBox').innerHTML = `
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;">
             <div>
                 <div class="form-group"><label>Nama Lengkap</label><input id="profFullname" value="${user.fullname || ''}"></div>
                 <div class="form-group"><label>Email</label><input value="${user.email}" disabled></div>
