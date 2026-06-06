@@ -1724,7 +1724,8 @@ function switchLoginMode(mode, btn) {
 // === LOGIN DENGAN GOOGLE (Supabase OAuth) ===
 async function loginWithGoogle() {
     try {
-        const redirectTo = window.location.origin + window.location.pathname + '#dashboard';
+        // Redirect tanpa hash — Supabase SDK akan strip token, lalu onAuthStateChange handle ke dashboard
+        const redirectTo = window.location.origin + window.location.pathname;
         const { error } = await sb.auth.signInWithOAuth({
             provider: 'google',
             options: { redirectTo }
@@ -2060,7 +2061,12 @@ sb.auth.onAuthStateChange(async (event, session) => {
     updateNavbarAuth();
     if (event === 'SIGNED_IN') {
         const hash = window.location.hash.replace('#', '');
-        if (hash === 'login' || hash === 'register' || hash === '') {
+        // Setelah OAuth, hash bisa berisi access_token=... (Supabase belum strip) atau empty (sudah strip)
+        // Auto-navigate ke dashboard jika di halaman auth, root, atau post-OAuth state
+        const isPostOAuth = hash.includes('access_token') || hash.includes('error=');
+        if (hash === 'login' || hash === 'register' || hash === '' || isPostOAuth) {
+            // Clean hash post-OAuth
+            if (isPostOAuth) history.replaceState(null, '', window.location.pathname);
             navigate('dashboard');
         }
     }
