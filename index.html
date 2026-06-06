@@ -2022,8 +2022,14 @@ function navigate(page, params) {
     const route = ROUTES[page];
     if (!route) { page = 'home'; }
     if (params) pendingOrder = params;
-    window.location.hash = page;
-    renderPage(page).catch(err => console.warn('[renderPage]', err));
+    // Fix double-render: kalau hash berubah, biarkan hashchange listener yang panggil renderPage.
+    // Kalau hash sama (no-op), render manual karena hashchange tidak akan fire.
+    const newHash = '#' + page;
+    if (window.location.hash === newHash) {
+        renderPage(page).catch(err => console.warn('[renderPage]', err));
+    } else {
+        window.location.hash = page; // hashchange listener akan trigger renderPage
+    }
 }
 
 async function renderPage(page) {
@@ -2305,6 +2311,10 @@ safeOn('contactForm', 'submit', async (e) => {
         }
         showAlert('contactAlert', '✓ Pesan terkirim! Tim kami akan merespon dalam 1x24 jam.', 'success');
         document.getElementById('contactForm').reset();
+    } catch (err) {
+        // Fix: catch withTimeout rejection / network error agar user dapat feedback (anti silent failure)
+        console.error('[contact]', err);
+        showAlert('contactAlert', translateError(err), 'error');
     } finally {
         btn.disabled = false;
         btn.innerHTML = orig;
@@ -2369,7 +2379,11 @@ safeOn('loginForm', 'submit', async (e) => {
         }
         const name = (currentUser && currentUser.fullname) || email;
         showAlert('loginAlert', `Selamat datang, ${name}!`, 'success');
-        setTimeout(() => navigate('dashboard'), 600);
+        // Navigate ke dashboard di-handle oleh onAuthStateChange SIGNED_IN listener
+        // (fix anti double-render race: hindari listener+setTimeout panggil navigate('dashboard') 2x)
+    } catch (err) {
+        console.error('[login]', err);
+        showAlert('loginAlert', translateError(err), 'error');
     } finally {
         btn.disabled = false;
         btn.innerHTML = orig;
@@ -2398,6 +2412,8 @@ safeOn('registerForm', 'submit', async (e) => {
     const orig = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '⏳ Memproses...';
+    // Fix: cegah button re-enable saat success-pending (anti duplicate signUp via re-click)
+    let successPending = false;
     try {
         const { data, error } = await withTimeout(
             sb.auth.signUp({
@@ -2414,6 +2430,7 @@ safeOn('registerForm', 'submit', async (e) => {
             return;
         }
 
+        successPending = true; // tahan button tetap disabled sampai navigate
         if (data && data.session) {
             await refreshSession();
             showAlert('registerAlert', 'Akun berhasil dibuat! Mengalihkan ke dashboard...', 'success');
@@ -2422,9 +2439,15 @@ safeOn('registerForm', 'submit', async (e) => {
             showAlert('registerAlert', 'Akun berhasil dibuat! Silakan cek email Anda untuk verifikasi, lalu login.', 'success');
             setTimeout(() => navigate('login'), 1500);
         }
+    } catch (err) {
+        // Fix: catch withTimeout/exception agar tidak silent-fail (button re-enable + alert)
+        console.error('[register]', err);
+        showAlert('registerAlert', translateError(err), 'error');
     } finally {
-        btn.disabled = false;
-        btn.innerHTML = orig;
+        if (!successPending) {
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        }
     }
 });
 
@@ -2537,6 +2560,10 @@ safeOn('checkoutForm', 'submit', async (e) => {
         confetti(80); // 🎊 Celebrate!
         pendingOrder = null;
         setTimeout(() => navigate('dashboard'), 2200);
+    } catch (err) {
+        // Fix: catch withTimeout rejection / network error agar user dapat feedback (anti silent payment failure)
+        console.error('[checkout]', err);
+        showAlert('checkoutAlert', translateError(err) || (err && err.message) || 'Pembayaran gagal. Coba lagi.', 'error');
     } finally {
         btn.disabled = false;
         btn.innerHTML = orig;
@@ -2757,6 +2784,23 @@ async function renderDashboard() {
         renderMiniChart('trafficChart', [42, 58, 47, 65, 71, 89, 95]);
     } catch (e) {
         console.error('[renderDashboard header]', e);
+    }
+    // Fix: Normalisasi sub-section ke overview setiap kali masuk dashboard
+    // (anti inkonsistensi state: konten profile + header greeting overview saat navigate keluar lalu balik)
+    try {
+        document.querySelectorAll('.dash-section').forEach(s => s.style.display = 'none');
+        const overviewSec = document.getElementById('dash-overview');
+        if (overviewSec) overviewSec.style.display = 'block';
+        document.querySelectorAll('.dash-menu a').forEach(a => a.classList.remove('active'));
+        const overviewLink = document.querySelector('.dash-menu a[data-section="overview"]');
+        if (overviewLink) overviewLink.classList.add('active');
+        document.querySelectorAll('.bottom-nav a').forEach(a =>
+            a.classList.toggle('active', a.dataset.section === 'overview')
+        );
+        const subEl = document.getElementById('dashSubtitle');
+        if (subEl) subEl.textContent = 'Ini ringkasan akun Anda hari ini.';
+    } catch (e) {
+        console.warn('[renderDashboard reset section]', e);
     }
     await renderOverview();
 }
