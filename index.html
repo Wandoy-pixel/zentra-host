@@ -1162,8 +1162,7 @@ details.faq p { margin-top: 12px; color: var(--text-muted); font-size: 14px; }
                 <h1>Login</h1>
 
                 <div class="login-tabs">
-                    <button class="login-tab active" data-loginmode="zentra" onclick="switchLoginMode('zentra', this)">Zentra</button>
-                    <button class="login-tab" data-loginmode="admin" onclick="switchLoginMode('admin', this)">Admin</button>
+                    <button class="login-tab active" data-loginmode="zentra">Zentra Customer</button>
                 </div>
 
                 <button type="button" class="google-btn" onclick="loginWithGoogle()">
@@ -1357,26 +1356,9 @@ function translateError(error) {
 }
 
 // === Bootstrap Admin (fire-and-forget di init) ===
-async function ensureAdminBootstrap() {
-    try {
-        const { error } = await sb.auth.signUp({
-            email: 'admin@zentra.id',
-            password: 'admin123',
-            options: { data: { fullname: 'Administrator', phone: '081234567890', role: 'admin' } }
-        });
-        if (error) {
-            const m = error.message || '';
-            if (/already registered|already.*registered|already been registered/i.test(m) || error.status === 422) {
-                // sudah ada, abaikan
-                return;
-            }
-            // error lain → diam saja (tidak ganggu UX user normal)
-            console.warn('[ensureAdminBootstrap]', m);
-        }
-    } catch (e) {
-        console.warn('[ensureAdminBootstrap exception]', e);
-    }
-}
+// Admin bootstrap dihapus karena security risk (privilege escalation + credential disclosure).
+// Untuk bikin admin, set role='admin' di tabel profiles via Supabase Dashboard:
+// UPDATE profiles SET role='admin' WHERE id = (SELECT id FROM auth.users WHERE email='your@email.com');
 
 // === Refresh session: ambil session + profile, isi cache ===
 async function refreshSession() {
@@ -1396,24 +1378,30 @@ async function refreshSession() {
             .single();
 
         if (pErr || !profile) {
-            // fallback: gunakan metadata user, profile null
+            // Fallback: pakai metadata user untuk fullname/phone, tapi role HARUS 'customer'
+            // (role admin HANYA bisa di-set di tabel profiles via Supabase Dashboard,
+            // never dari user_metadata yang user-writable - security: anti privilege escalation)
             currentProfile = null;
+            const safeEmail = u.email || '';
+            const emailPart = safeEmail ? safeEmail.split('@')[0] : 'user';
             currentUser = {
                 id: u.id,
-                email: u.email,
-                fullname: (u.user_metadata && u.user_metadata.fullname) || u.email.split('@')[0],
+                email: safeEmail,
+                fullname: (u.user_metadata && u.user_metadata.fullname) || emailPart,
                 phone: (u.user_metadata && u.user_metadata.phone) || '',
-                role: (u.user_metadata && u.user_metadata.role) || 'customer',
+                role: 'customer', // ALWAYS customer di fallback - security
                 createdAt: u.created_at
             };
         } else {
             currentProfile = profile;
+            const safeEmail = u.email || '';
+            const emailPart = safeEmail ? safeEmail.split('@')[0] : 'user';
             currentUser = {
                 id: u.id,
-                email: u.email,
-                fullname: profile.fullname || (u.user_metadata && u.user_metadata.fullname) || u.email.split('@')[0],
+                email: safeEmail,
+                fullname: profile.fullname || (u.user_metadata && u.user_metadata.fullname) || emailPart,
                 phone: profile.phone || '',
-                role: profile.role || 'customer',
+                role: profile.role || 'customer', // role dari tabel profiles (server-controlled)
                 createdAt: profile.created_at || u.created_at
             };
         }
@@ -1481,7 +1469,9 @@ function navigate(page, params) {
 }
 
 async function renderPage(page) {
-    const route = ROUTES[page] || ROUTES.home;
+    // Fallback ke home kalau page invalid (anti-crash on bad hash)
+    if (!ROUTES[page]) page = 'home';
+    const route = ROUTES[page];
 
     // Auth-gate via Supabase session
     if (route.requireAuth) {
@@ -1489,13 +1479,17 @@ async function renderPage(page) {
         if (!session) {
             showAlert('loginAlert', 'Silakan login terlebih dahulu', 'info');
             page = 'login';
+        } else if (!currentUser) {
+            // Session valid tapi cache kosong (race condition) - refresh dulu
+            await refreshSession();
         }
     }
 
     const finalRoute = ROUTES[page] || ROUTES.home;
     // Hide all layouts
     document.querySelectorAll('.layout').forEach(l => l.classList.remove('active'));
-    document.getElementById('layout-' + finalRoute.layout).classList.add('active');
+    const layoutEl = document.getElementById('layout-' + finalRoute.layout);
+    if (layoutEl) layoutEl.classList.add('active');
     // Hide all pages
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const pageEl = document.getElementById('page-' + page);
@@ -1710,11 +1704,9 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
 // === LOGIN TABS (Zentra / Admin) ===
 function switchLoginMode(mode, btn) {
     document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
+    if (btn) btn.classList.add('active');
     if (mode === 'admin') {
-        document.getElementById('loginEmail').value = 'admin@zentra.id';
-        document.getElementById('loginPassword').value = 'admin123';
-        showAlert('loginAlert', '👑 Mode Admin — klik Login untuk masuk dengan akun admin Supabase.', 'info');
+        // Deprecated - admin login via form normal, role di-set via Supabase Dashboard
     } else {
         document.getElementById('loginEmail').value = '';
         document.getElementById('loginPassword').value = '';
@@ -2059,13 +2051,15 @@ sb.auth.onAuthStateChange(async (event, session) => {
         currentProfile = null;
     }
     updateNavbarAuth();
+    // Skip INITIAL_SESSION dan handler lain sebelum init() selesai (anti race condition)
+    if (!authInitialized && event === 'INITIAL_SESSION') return;
     if (event === 'SIGNED_IN') {
         const hash = window.location.hash.replace('#', '');
-        // Setelah OAuth, hash bisa berisi access_token=... (Supabase belum strip) atau empty (sudah strip)
-        // Auto-navigate ke dashboard jika di halaman auth, root, atau post-OAuth state
-        const isPostOAuth = hash.includes('access_token') || hash.includes('error=');
-        if (hash === 'login' || hash === 'register' || hash === '' || isPostOAuth) {
-            // Clean hash post-OAuth
+        const search = window.location.search;
+        // Post-OAuth detection: PKCE flow pakai ?code=..., implicit flow pakai #access_token=...
+        const isPostOAuth = hash.includes('access_token') || hash.includes('error=') || search.includes('code=');
+        if (hash === 'login' || hash === 'register' || isPostOAuth) {
+            // Clean URL post-OAuth (hilangkan token/code dari URL biar gak bocor ke referer)
             if (isPostOAuth) history.replaceState(null, '', window.location.pathname);
             navigate('dashboard');
         }
@@ -2073,15 +2067,16 @@ sb.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_OUT') {
         const route = ROUTES[window.location.hash.replace('#', '')];
         if (route && route.requireAuth) navigate('home');
+        else navigate('home');
     }
 });
 
 // === Initial Load ===
+let authInitialized = false;
 (async function init() {
-    // Bootstrap admin (fire-and-forget, jangan blokir render)
-    ensureAdminBootstrap();
     // Pastikan session sudah ter-load sebelum render pertama
     await refreshSession();
+    authInitialized = true;
     const initialPage = window.location.hash.replace('#', '') || 'home';
     await renderPage(initialPage);
 })();
