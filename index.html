@@ -2079,7 +2079,13 @@ function renderHomePricing() {
     }).join('');
 }
 
-document.getElementById('homePricingToggle').addEventListener('click', (e) => {
+// Helper: safe addEventListener (null-check to prevent crash if element missing)
+function safeOn(id, ev, fn) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener(ev, fn);
+}
+
+safeOn('homePricingToggle', 'click', (e) => {
     if (e.target.tagName !== 'BUTTON') return;
     document.querySelectorAll('#homePricingToggle button').forEach(b => b.classList.remove('active'));
     e.target.classList.add('active');
@@ -2122,7 +2128,7 @@ function renderPaket(type) {
         </div>
     `).join('');
 }
-document.getElementById('paketToggle').addEventListener('click', (e) => {
+safeOn('paketToggle', 'click', (e) => {
     if (e.target.tagName !== 'BUTTON') return;
     document.querySelectorAll('#paketToggle button').forEach(b => b.classList.remove('active'));
     e.target.classList.add('active');
@@ -2162,7 +2168,7 @@ function renderDomainPrices() {
     `).join('');
 }
 
-document.getElementById('domainSearchForm').addEventListener('submit', (e) => {
+safeOn('domainSearchForm', 'submit', (e) => {
     e.preventDefault();
     const rawName = document.getElementById('domainInput').value.toLowerCase().trim();
     const ext = document.getElementById('domainExtension').value;
@@ -2205,7 +2211,7 @@ document.getElementById('domainSearchForm').addEventListener('submit', (e) => {
 });
 
 // === KONTAK ===
-document.getElementById('contactForm').addEventListener('submit', async (e) => {
+safeOn('contactForm', 'submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('contactName').value.trim();
     const email = document.getElementById('contactEmail').value.trim();
@@ -2262,7 +2268,7 @@ async function loginWithGoogle() {
 }
 
 // === LOGIN ===
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
+safeOn('loginForm', 'submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim().toLowerCase();
     const password = document.getElementById('loginPassword').value;
@@ -2292,7 +2298,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 });
 
 // === REGISTER ===
-document.getElementById('registerForm').addEventListener('submit', async (e) => {
+safeOn('registerForm', 'submit', async (e) => {
     e.preventDefault();
     const fullname = document.getElementById('regFullname').value.trim();
     const email = document.getElementById('regEmail').value.trim().toLowerCase();
@@ -2373,7 +2379,7 @@ function renderCheckout() {
 
 function renderSummary() {
     if (!pendingOrder) return;
-    const period = PERIODS.find(p => p.months === selectedPeriod);
+    const period = PERIODS.find(p => p.months === selectedPeriod) || PERIODS[0];
     const subtotal = pendingOrder.price * (pendingOrder.type === 'domain' ? 1 : period.months);
     const discount = pendingOrder.type === 'domain' ? 0 : subtotal * (period.discount / 100);
     const ppn = (subtotal - discount) * 0.11;
@@ -2400,7 +2406,7 @@ function renderSummary() {
     if (sel) sel.addEventListener('change', (e) => { selectedPeriod = parseInt(e.target.value); renderSummary(); });
 }
 
-document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+safeOn('checkoutForm', 'submit', async (e) => {
     e.preventDefault();
     if (!currentUser) await refreshSession();
     const user = getUser();
@@ -2419,7 +2425,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
     btn.disabled = true;
     btn.innerHTML = '⏳ Memproses pembayaran...';
     try {
-        const period = PERIODS.find(p => p.months === selectedPeriod);
+        const period = PERIODS.find(p => p.months === selectedPeriod) || PERIODS[0];
         const subtotal = pendingOrder.price * (pendingOrder.type === 'domain' ? 1 : period.months);
         const discount = pendingOrder.type === 'domain' ? 0 : subtotal * (period.discount / 100);
         const ppn = (subtotal - discount) * 0.11;
@@ -2748,7 +2754,7 @@ async function renderHosting() {
     }
     box.innerHTML = `<table><thead><tr><th>Paket</th><th>Tipe</th><th>Mulai</th><th>Berakhir</th><th>Status</th><th>Aksi</th></tr></thead><tbody>${orders.map(o => {
         const s = getStatus(o.created_at, o.period);
-        return `<tr><td><strong>${o.name}</strong></td><td>${o.type.toUpperCase()}</td><td>${fmtDate(o.created_at)}</td><td>${fmtDate(calcExpiry(o.created_at, o.period))}</td><td><span class="status status-${s.c}">${s.l}</span></td><td><button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;" onclick="showDetail(${o.id})">Detail</button></td></tr>`;
+        return `<tr><td><strong>${o.name}</strong></td><td>${o.type.toUpperCase()}</td><td>${fmtDate(o.created_at)}</td><td>${fmtDate(calcExpiry(o.created_at, o.period))}</td><td><span class="status status-${s.c}">${s.l}</span></td><td><button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;" onclick="showDetail('${o.id}')">Detail</button></td></tr>`;
     }).join('')}</tbody></table>`;
 }
 
@@ -2823,7 +2829,7 @@ async function updateProfile() {
 
 async function showDetail(id) {
     const orders = await getOrders();
-    const o = orders.find(x => x.id === id);
+    const o = orders.find(x => String(x.id) === String(id));
     if (!o) return;
     const user = getUser();
     const cpanelUser = user && user.email ? user.email.split('@')[0] : 'user';
@@ -2867,11 +2873,27 @@ sb.auth.onAuthStateChange(async (event, session) => {
 // === Initial Load ===
 let authInitialized = false;
 (async function init() {
-    // Pastikan session sudah ter-load sebelum render pertama
-    await refreshSession();
+    try {
+        await refreshSession();
+    } catch (e) {
+        console.warn('[init refreshSession]', e);
+    }
     authInitialized = true;
-    const initialPage = window.location.hash.replace('#', '') || 'home';
-    await renderPage(initialPage);
+    try {
+        const initialPage = window.location.hash.replace('#', '') || 'home';
+        await renderPage(initialPage);
+    } catch (e) {
+        console.error('[init renderPage]', e);
+        // Fallback hard-reset: pastikan setidaknya home page tampil
+        try { await renderPage('home'); } catch (_) {
+            document.querySelectorAll('.layout').forEach(l => l.classList.remove('active'));
+            const pub = document.getElementById('layout-public');
+            if (pub) pub.classList.add('active');
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const home = document.getElementById('page-home');
+            if (home) home.classList.add('active');
+        }
+    }
 })();
 </script>
 </body>
