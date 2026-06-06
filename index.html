@@ -1096,7 +1096,10 @@ if (typeof supabase === 'undefined' || window.__sbCdnFailed) {
             </ul>
             <div style="display:flex;gap:10px;align-items:center;">
                 <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Ubah tema">🌙</button>
-                <div class="nav-auth" id="navAuth"></div>
+                <div class="nav-auth" id="navAuth">
+                    <a class="btn btn-ghost" onclick="navigate('login')">Masuk</a>
+                    <a class="btn btn-primary" onclick="navigate('register')">Mulai Gratis →</a>
+                </div>
             </div>
             <button class="nav-toggle" onclick="document.getElementById('navMenu').classList.toggle('show')">☰</button>
         </div>
@@ -2961,14 +2964,17 @@ sb.auth.onAuthStateChange(async (event, session) => {
 // Kalau init() berhasil, dia akan re-render ke page yang benar.
 (function showHomeImmediately() {
     try {
-        const layoutPub = document.getElementById('layout-public');
-        const pageHome = document.getElementById('page-home');
-        if (layoutPub && !layoutPub.classList.contains('active')) {
-            layoutPub.classList.add('active');
-        }
-        if (pageHome && !pageHome.classList.contains('active')) {
-            pageHome.classList.add('active');
-        }
+        const hash = window.location.hash.replace('#', '') || 'home';
+        const routeMap = {
+            home: ['public', 'home'], paket: ['public', 'paket'], domain: ['public', 'domain'],
+            kontak: ['public', 'kontak'], checkout: ['public', 'checkout'],
+            login: ['auth', 'login'], register: ['auth', 'register']
+        };
+        const target = routeMap[hash] || ['public', 'home'];
+        const layoutEl = document.getElementById('layout-' + target[0]);
+        const pageEl = document.getElementById('page-' + target[1]);
+        if (layoutEl) layoutEl.classList.add('active');
+        if (pageEl) pageEl.classList.add('active');
     } catch (e) { console.warn('[safety net]', e); }
 })();
 
