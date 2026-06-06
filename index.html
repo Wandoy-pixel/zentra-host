@@ -791,11 +791,105 @@ details.faq p { margin-top: 12px; color: var(--text-muted); font-size: 14px; }
 .dash-card table, .dash-section table { min-width: 600px; }
 .dash-card { overflow-x: auto; }
 button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ============ CUSTOM MODAL ============ */
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    z-index: 9999; display: none; align-items: center; justify-content: center;
+    padding: 20px; animation: fadeIn 0.2s ease;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px; max-width: 480px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-icon { font-size: 48px; text-align: center; margin-bottom: 12px; }
+.modal-title { font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+.modal-body { color: var(--text-muted); text-align: center; margin-bottom: 24px; line-height: 1.6; white-space: pre-wrap; }
+.modal-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.modal-actions .btn { min-width: 100px; }
+
+/* ============ TOAST NOTIFICATION ============ */
+.toast-container {
+    position: fixed; top: 20px; right: 20px; z-index: 10000;
+    display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+    max-width: 360px; width: calc(100% - 40px);
+}
+.toast {
+    background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent);
+    border-radius: 10px; padding: 14px 18px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    pointer-events: auto; display: flex; gap: 12px; align-items: flex-start;
+    animation: toastIn 0.3s ease;
+}
+@keyframes toastIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes toastOut { to { transform: translateX(120%); opacity: 0; } }
+.toast.toast-out { animation: toastOut 0.25s ease forwards; }
+.toast.success { border-left-color: var(--success); }
+.toast.error { border-left-color: var(--danger); }
+.toast.info { border-left-color: var(--secondary); }
+.toast-icon { font-size: 20px; flex-shrink: 0; }
+.toast-content { flex: 1; font-size: 14px; line-height: 1.4; }
+.toast-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; padding: 0 4px; }
+
+/* ============ AVATAR DROPDOWN ============ */
+.user-dropdown { position: relative; }
+.user-dropdown.open .user-menu-list { display: block; }
+.user-dropdown-trigger { cursor: pointer; user-select: none; }
+.user-menu-list {
+    display: none; position: absolute; top: calc(100% + 8px); right: 0;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+    min-width: 200px; box-shadow: 0 12px 32px rgba(0,0,0,0.3); padding: 8px; z-index: 50;
+    animation: slideUp 0.2s ease;
+}
+.user-menu-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+    border-radius: 8px; color: var(--text); cursor: pointer; font-size: 14px; text-decoration: none;
+}
+.user-menu-item:hover { background: rgba(255,255,255,0.05); color: var(--accent); }
+.user-menu-item.danger:hover { background: rgba(239,68,68,0.1); color: var(--danger); }
+.user-menu-divider { height: 1px; background: var(--border); margin: 6px 0; }
+
+/* ============ MOBILE DASHBOARD DRAWER ============ */
+.dash-toggle {
+    display: none; background: var(--bg-card); border: 1px solid var(--border); color: var(--text);
+    width: 38px; height: 38px; border-radius: 10px; cursor: pointer; font-size: 18px;
+    align-items: center; justify-content: center;
+}
+.dash-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+.dash-backdrop.show { display: block; }
+@media (max-width: 968px) {
+    .dash-toggle { display: inline-flex; }
+    .dash-side {
+        position: fixed; top: 0; left: 0; width: 260px; height: 100vh; z-index: 100;
+        transform: translateX(-100%); transition: transform 0.25s ease;
+        display: block !important;
+    }
+    .dash-side.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.4); }
+    .dash { grid-template-columns: 1fr; }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="mesh-bg"></div>
+
+<!-- Toast notifications container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Custom Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal-box">
+        <div class="modal-icon" id="modalIcon">💬</div>
+        <h3 class="modal-title" id="modalTitle">Konfirmasi</h3>
+        <div class="modal-body" id="modalBody">Pesan modal</div>
+        <div class="modal-actions" id="modalActions"></div>
+    </div>
+</div>
+
+<!-- Dashboard backdrop (mobile) -->
+<div class="dash-backdrop" id="dashBackdrop" onclick="toggleDashDrawer()"></div>
 
 <!-- ========== LAYOUT: PUBLIC (Navbar + content + Footer) ========== -->
 <div class="layout" id="layout-public">
@@ -1195,7 +1289,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
                 <form id="loginForm">
                     <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="nama@email.com" required></div>
                     <div class="form-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••" required></div>
-                    <a class="forgot-link" onclick="alert('Fitur lupa password — silakan hubungi admin di support@zentra.id')">Lupa password?</a>
+                    <a class="forgot-link" onclick="infoModal('Lupa Password?', 'Untuk reset password, silakan hubungi admin di support@zentra.id atau gunakan fitur reset password Supabase.', '🔑')">Lupa password?</a>
                     <button type="submit" class="btn btn-primary btn-block btn-lg">Login</button>
                 </form>
 
@@ -1266,17 +1360,31 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
         </aside>
         <main class="dash-main">
             <div class="dash-head">
-                <div>
-                    <h1 id="dashTitle">Selamat datang!</h1>
-                    <p id="dashSubtitle">Ini ringkasan akun Anda hari ini.</p>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button class="dash-toggle" onclick="toggleDashDrawer()" title="Menu">☰</button>
+                    <div>
+                        <h1 id="dashTitle">Selamat datang!</h1>
+                        <p id="dashSubtitle">Ini ringkasan akun Anda hari ini.</p>
+                    </div>
                 </div>
                 <div style="display:flex;gap:12px;align-items:center;">
                     <button class="theme-toggle" onclick="toggleTheme()" title="Ubah tema">🌙</button>
-                    <div class="dash-user">
-                        <div class="avatar" id="dashAvatar">U</div>
-                        <div>
-                            <h4 id="dashUserName" style="font-size:13px;font-weight:600;">User</h4>
-                            <small id="dashUserEmail" style="color:var(--text-muted);font-size:11px;">user@email.com</small>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dash-user user-dropdown-trigger" onclick="toggleUserMenu()">
+                            <div class="avatar" id="dashAvatar">U</div>
+                            <div>
+                                <h4 id="dashUserName" style="font-size:13px;font-weight:600;">User</h4>
+                                <small id="dashUserEmail" style="color:var(--text-muted);font-size:11px;">user@email.com</small>
+                            </div>
+                            <span style="color:var(--text-muted);font-size:10px;">▼</span>
+                        </div>
+                        <div class="user-menu-list">
+                            <a class="user-menu-item" onclick="closeUserMenu();switchDashSection('overview', document.querySelector('.dash-menu a[data-section=overview]'))">⚡ Dashboard</a>
+                            <a class="user-menu-item" onclick="closeUserMenu();switchDashSection('profile', document.querySelector('.dash-menu a[data-section=profile]'))">👤 Profil Saya</a>
+                            <a class="user-menu-item" onclick="closeUserMenu();switchDashSection('invoice', document.querySelector('.dash-menu a[data-section=invoice]'))">📄 Invoice</a>
+                            <div class="user-menu-divider"></div>
+                            <a class="user-menu-item" onclick="closeUserMenu();navigate('home')">🏠 Kembali ke Beranda</a>
+                            <a class="user-menu-item danger" onclick="closeUserMenu();logout()">↪ Keluar</a>
                         </div>
                     </div>
                 </div>
@@ -1427,6 +1535,81 @@ async function refreshSession() {
     }
 }
 
+// === CUSTOM MODAL ===
+function showModal({ icon = '💬', title = 'Konfirmasi', body = '', actions = [] }) {
+    document.getElementById('modalIcon').textContent = icon;
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalBody').textContent = body;
+    const actionsEl = document.getElementById('modalActions');
+    actionsEl.innerHTML = '';
+    actions.forEach(a => {
+        const btn = document.createElement('button');
+        btn.className = 'btn ' + (a.class || 'btn-primary');
+        btn.textContent = a.label;
+        btn.onclick = () => { closeModal(); if (a.onClick) a.onClick(); };
+        actionsEl.appendChild(btn);
+    });
+    document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+function confirmModal(title, body, onConfirm, confirmLabel = 'Ya') {
+    showModal({
+        icon: '❓', title, body,
+        actions: [
+            { label: 'Batal', class: 'btn-ghost' },
+            { label: confirmLabel, class: 'btn-primary', onClick: onConfirm }
+        ]
+    });
+}
+function infoModal(title, body, icon = 'ℹ️') {
+    showModal({ icon, title, body, actions: [{ label: 'OK', class: 'btn-primary' }] });
+}
+// ESC closes modal
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeUserMenu(); } });
+
+// === TOAST NOTIFICATIONS ===
+function showToast(message, type = 'info', duration = 4000) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = 'toast ' + type;
+    const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+    toast.innerHTML = `
+        <span class="toast-icon">${icons[type] || icons.info}</span>
+        <div class="toast-content">${message}</div>
+        <button class="toast-close" onclick="this.parentElement.classList.add('toast-out');setTimeout(()=>this.parentElement.remove(),250)">×</button>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.classList.add('toast-out');
+        setTimeout(() => toast.remove(), 250);
+    }, duration);
+}
+
+// === AVATAR DROPDOWN ===
+function toggleUserMenu() {
+    const dd = document.getElementById('userDropdown');
+    if (dd) dd.classList.toggle('open');
+}
+function closeUserMenu() {
+    const dd = document.getElementById('userDropdown');
+    if (dd) dd.classList.remove('open');
+}
+// Click outside closes dropdown
+document.addEventListener('click', e => {
+    const dd = document.getElementById('userDropdown');
+    if (dd && dd.classList.contains('open') && !dd.contains(e.target)) closeUserMenu();
+});
+
+// === MOBILE DASHBOARD DRAWER ===
+function toggleDashDrawer() {
+    const side = document.querySelector('.dash-side');
+    const backdrop = document.getElementById('dashBackdrop');
+    if (!side || !backdrop) return;
+    side.classList.toggle('open');
+    backdrop.classList.toggle('show');
+}
+
 // === Utils ===
 const fmtDate = d => new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 const fmtRp = n => 'Rp ' + Number(n).toLocaleString('id-ID');
@@ -1552,7 +1735,17 @@ function updateNavbarAuth() {
 }
 
 async function logout() {
-    if (!confirm('Yakin ingin keluar?')) return;
+    confirmModal('Keluar dari Zentra?', 'Anda akan keluar dari akun ini. Untuk masuk lagi, perlu login ulang.', async () => {
+        try {
+            await sb.auth.signOut();
+            showToast('Berhasil keluar', 'success');
+        } catch (e) {
+            console.warn('[logout]', e);
+            showToast('Gagal keluar, coba lagi', 'error');
+        }
+    }, 'Keluar');
+}
+async function _legacyLogout() {
     try {
         await sb.auth.signOut();
     } catch (e) {
@@ -1761,7 +1954,7 @@ async function loginWithGoogle() {
             options: { redirectTo }
         });
         if (error) {
-            alert('Login Google belum diaktifkan. Hubungi admin atau gunakan email/password.');
+            infoModal('Login Google Belum Aktif', 'Login Google belum diaktifkan di Supabase. Silakan gunakan email & password untuk sekarang, atau hubungi admin untuk mengaktifkan Google OAuth.', '⚠️');
             console.warn('[Google OAuth error]', error);
         }
     } catch (e) {
@@ -1979,6 +2172,13 @@ async function switchDashSection(sec, el) {
     if (el) el.classList.add('active');
     document.querySelectorAll('.dash-section').forEach(s => s.style.display = 'none');
     document.getElementById('dash-' + sec).style.display = 'block';
+    // Auto-close mobile drawer setelah pilih menu
+    const side = document.querySelector('.dash-side');
+    const backdrop = document.getElementById('dashBackdrop');
+    if (side && side.classList.contains('open')) {
+        side.classList.remove('open');
+        backdrop.classList.remove('show');
+    }
     const titles = {
         overview: ['Selamat datang!', 'Ini ringkasan akun Anda hari ini.'],
         hosting: ['Hosting Saya', 'Kelola semua layanan hosting Anda.'],
@@ -2082,7 +2282,7 @@ async function updateProfile() {
     if (!user) return;
     const newName = document.getElementById('profFullname').value.trim();
     const newPhone = document.getElementById('profPhone').value.trim();
-    if (!newName) return alert('Nama tidak boleh kosong');
+    if (!newName) { showToast('Nama tidak boleh kosong', 'error'); return; }
 
     const { error } = await sb
         .from('profiles')
@@ -2098,7 +2298,7 @@ async function updateProfile() {
     currentUser.phone = newPhone;
     document.getElementById('dashUserName').textContent = newName;
     document.getElementById('dashAvatar').textContent = newName.charAt(0).toUpperCase();
-    alert('Profil berhasil diperbarui!');
+    showToast('✓ Profil berhasil diperbarui', 'success');
 }
 
 async function showDetail(id) {
@@ -2107,7 +2307,12 @@ async function showDetail(id) {
     if (!o) return;
     const user = getUser();
     const cpanelUser = user && user.email ? user.email.split('@')[0] : 'user';
-    alert(`📋 ${o.name}\n\nTipe: ${o.type.toUpperCase()}\nPeriode: ${o.period || 1} bulan\nMulai: ${fmtDate(o.created_at)}\nBerakhir: ${fmtDate(calcExpiry(o.created_at, o.period))}\nHarga: ${fmtRp(o.price)}\n\nIP Server: 103.124.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}\nUsername cPanel: ${cpanelUser}\nStatus: Aktif`);
+    showModal({
+        icon: '📋',
+        title: o.name,
+        body: `Tipe: ${o.type.toUpperCase()}\nPeriode: ${o.period || 1} bulan\nMulai: ${fmtDate(o.created_at)}\nBerakhir: ${fmtDate(calcExpiry(o.created_at, o.period))}\nHarga: ${fmtRp(o.price)}\n\nIP Server: 103.124.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}\nUsername cPanel: ${cpanelUser}\nStatus: Aktif`,
+        actions: [{ label: 'Tutup', class: 'btn-primary' }]
+    });
 }
 
 // === Auth State Listener ===
