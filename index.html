@@ -1683,7 +1683,7 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
                         <div class="cpanel-tile" onclick="infoModal('File Manager', 'Akses dan kelola semua file hosting kamu.\\n\\n• 2.4 GB dari 10 GB digunakan\\n• 1,247 file dalam public_html\\n• Last modified: hari ini', '🗂️')"><div class="ic">🗂️</div><h5>File Manager</h5><p>2.4 GB</p></div>
                         <div class="cpanel-tile" onclick="infoModal('MySQL Databases', 'Database PostgreSQL terhubung ke Supabase.\\n\\n• zentra_main (active)\\n• zentra_logs (active)\\n• zentra_cache (active)', '🗄️')"><div class="ic">🗄️</div><h5>MySQL</h5><p>3 databases</p></div>
                         <div class="cpanel-tile" onclick="infoModal('Email Manager', 'Buat email professional dengan domain kamu.\\n\\n• admin@zentra.id\\n• support@zentra.id\\n• info@zentra.id', '📧')"><div class="ic">📧</div><h5>Email</h5><p>3 accounts</p></div>
-                        <div class="cpanel-tile" onclick="infoModal('SSL/TLS', 'Sertifikat SSL gratis dari Let\\'s Encrypt.\\n\\n• Status: Active 🟢\\n• Expires: 90 days\\n• Auto-renew: ON', '🔐')"><div class="ic">🔐</div><h5>SSL/TLS</h5><p>Active</p></div>
+                        <div class="cpanel-tile" onclick="infoModal('SSL/TLS', 'Sertifikat SSL gratis dari Let&#39;s Encrypt.\\n\\n• Status: Active 🟢\\n• Expires: 90 days\\n• Auto-renew: ON', '🔐')"><div class="ic">🔐</div><h5>SSL/TLS</h5><p>Active</p></div>
                         <div class="cpanel-tile" onclick="infoModal('Subdomains', 'Buat subdomain untuk staging/blog/dll.\\n\\n• www.zentrahost.com\\n• blog.zentrahost.com\\n• shop.zentrahost.com', '🔗')"><div class="ic">🔗</div><h5>Subdomain</h5><p>3 active</p></div>
                         <div class="cpanel-tile" onclick="infoModal('PHP Version', 'Pilih versi PHP untuk website kamu.\\n\\nCurrent: PHP 8.3\\nAvailable: 7.4, 8.0, 8.1, 8.2, 8.3', '🐘')"><div class="ic">🐘</div><h5>PHP Version</h5><p>v8.3</p></div>
                         <div class="cpanel-tile" onclick="infoModal('Cron Jobs', 'Jadwalkan tugas otomatis di server.\\n\\n• Backup harian (active)\\n• Cache cleanup (active)\\n• Health check (active)', '⏰')"><div class="ic">⏰</div><h5>Cron Jobs</h5><p>3 jobs</p></div>
@@ -2494,7 +2494,6 @@ function renderMiniChart(elId, data) {
 function renderActivity() {
     const el = document.getElementById('activityTimeline');
     if (!el) return;
-    const orders = currentUser ? null : null; // Will populate from real data below
     const activities = [
         { icon: '🛒', cls: '', title: 'Pembelian paket berhasil', desc: 'Business / Shared Hosting', time: 'Baru saja' },
         { icon: '👤', cls: 'purple', title: 'Profil diperbarui', desc: 'Update informasi akun', time: '5 menit lalu' },
@@ -2585,7 +2584,7 @@ function confetti(count = 60) {
 
 // === cPanel / DNS / Backup ===
 function openCpanel() {
-    infoModal('cPanel Login', '🛠️ Mengarahkan ke cPanel...\\n\\nUsername: ' + (currentUser ? currentUser.email.split('@')[0] : 'user') + '\\nServer: srv01.zentra.id\\nPort: 2083 (SSL)\\n\\nKlik OK untuk masuk dashboard cPanel mockup di sidebar.', '🛠️');
+    infoModal('cPanel Login', '🛠️ Mengarahkan ke cPanel...\n\nUsername: ' + (currentUser && currentUser.email ? currentUser.email.split('@')[0] : 'user') + '\nServer: srv01.zentra.id\nPort: 2083 (SSL)\n\nKlik OK untuk masuk dashboard cPanel mockup di sidebar.', '🛠️');
     setTimeout(() => switchDashSection('cpanel', document.querySelector('.dash-menu a[data-section=cpanel]')), 300);
 }
 
@@ -2648,19 +2647,24 @@ async function renderDashboard() {
     }
     const user = getUser();
     if (!user) { navigate('login'); return; }
-    document.getElementById('dashUserName').textContent = user.fullname;
-    document.getElementById('dashUserEmail').textContent = user.email;
-    document.getElementById('dashAvatar').textContent = (user.fullname || 'U').charAt(0).toUpperCase();
-    // Greeting personal time-aware
-    const g = getGreeting();
-    document.getElementById('greetingEmoji').textContent = g.emoji;
-    document.getElementById('dashTitle').textContent = `${g.text}, ${user.fullname.split(' ')[0]}!`;
-    // Notifications
-    renderNotifications();
-    // Activity timeline
-    renderActivity();
-    // Mini chart traffic
-    renderMiniChart('trafficChart', [42, 58, 47, 65, 71, 89, 95]);
+    try {
+        const safeName = String(user.fullname || user.email || 'User');
+        const firstName = safeName.split(' ')[0] || 'User';
+        const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+        setText('dashUserName', safeName);
+        setText('dashUserEmail', user.email || '');
+        setText('dashAvatar', safeName.charAt(0).toUpperCase());
+        // Greeting personal time-aware
+        const g = getGreeting();
+        setText('greetingEmoji', g.emoji);
+        setText('dashTitle', `${g.text}, ${firstName}!`);
+        // Render new components (each guarded internally)
+        renderNotifications();
+        renderActivity();
+        renderMiniChart('trafficChart', [42, 58, 47, 65, 71, 89, 95]);
+    } catch (e) {
+        console.error('[renderDashboard header]', e);
+    }
     await renderOverview();
 }
 
@@ -2677,7 +2681,7 @@ async function switchDashSection(sec, el) {
     const backdrop = document.getElementById('dashBackdrop');
     if (side && side.classList.contains('open')) {
         side.classList.remove('open');
-        backdrop.classList.remove('show');
+        if (backdrop) backdrop.classList.remove('show');
     }
     const titles = {
         overview: ['Dashboard', 'Ini ringkasan akun Anda hari ini.'],
