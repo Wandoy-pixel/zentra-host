@@ -851,6 +851,169 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .user-menu-item.danger:hover { background: rgba(239,68,68,0.1); color: var(--danger); }
 .user-menu-divider { height: 1px; background: var(--border); margin: 6px 0; }
 
+/* ============ DASHBOARD ENHANCEMENTS ============ */
+.greeting-block { display: flex; align-items: center; gap: 12px; }
+.greeting-emoji { font-size: 36px; }
+.greeting-text h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+.greeting-text p { color: var(--text-muted); font-size: 13px; }
+
+/* Server status banner */
+.server-status {
+    background: linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(20,184,166,0.1) 100%);
+    border: 1px solid rgba(16,185,129,0.3); border-radius: var(--radius);
+    padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px;
+    flex-wrap: wrap;
+}
+.status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--success); box-shadow: 0 0 12px var(--success); animation: pulse 2s infinite; }
+.status-text { font-weight: 600; color: var(--success); }
+.status-meta { color: var(--text-muted); font-size: 13px; margin-left: auto; display: flex; gap: 16px; }
+@media (max-width: 600px) { .status-meta { width: 100%; margin-left: 0; flex-direction: column; gap: 4px; } }
+
+/* Resource Usage Cards */
+.resource-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) { .resource-grid { grid-template-columns: 1fr; } }
+.resource-item { padding: 12px 0; }
+.resource-item:not(:last-child) { border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 4px; }
+.resource-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; }
+.resource-label .name { color: var(--text); font-weight: 500; }
+.resource-label .val { color: var(--text-muted); font-size: 12px; }
+.progress-bar { height: 8px; background: rgba(255,255,255,0.08); border-radius: 100px; overflow: hidden; position: relative; }
+.progress-fill { height: 100%; background: var(--gradient); border-radius: 100px; transition: width 0.6s ease; }
+.progress-fill.warn { background: linear-gradient(90deg, var(--warning), var(--danger)); }
+
+/* Quick Actions Panel */
+.quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.qa-btn {
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 12px; text-align: center; cursor: pointer; transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text);
+    font-family: inherit; font-size: 12px;
+}
+.qa-btn:hover { background: rgba(20,184,166,0.1); border-color: var(--accent); transform: translateY(-2px); color: var(--accent); }
+.qa-btn .ic { font-size: 22px; }
+
+/* Activity Timeline */
+.timeline-item { display: flex; gap: 14px; padding: 12px 0; position: relative; }
+.timeline-item:not(:last-child) { border-bottom: 1px dashed var(--border); }
+.timeline-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(20,184,166,0.15); color: var(--accent);
+    display: grid; place-items: center; flex-shrink: 0; font-size: 16px;
+}
+.timeline-icon.purple { background: rgba(99,102,241,0.15); color: var(--secondary); }
+.timeline-icon.orange { background: rgba(245,158,11,0.15); color: var(--warning); }
+.timeline-content { flex: 1; }
+.timeline-content h5 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.timeline-content p { color: var(--text-muted); font-size: 12px; }
+.timeline-time { color: var(--text-muted); font-size: 11px; }
+
+/* Notification Bell */
+.notif-wrap { position: relative; }
+.notif-btn {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--bg-card); border: 1px solid var(--border); color: var(--text);
+    cursor: pointer; display: grid; place-items: center; font-size: 18px; position: relative;
+}
+.notif-btn:hover { border-color: var(--accent); }
+.notif-badge {
+    position: absolute; top: -4px; right: -4px;
+    background: var(--danger); color: white; border-radius: 100px;
+    min-width: 18px; height: 18px; font-size: 10px; font-weight: 700;
+    display: grid; place-items: center; padding: 0 4px; border: 2px solid var(--bg);
+}
+.notif-list {
+    display: none; position: absolute; top: calc(100% + 8px); right: 0;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+    width: 340px; max-height: 420px; overflow-y: auto;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.3); z-index: 50;
+    animation: slideUp 0.2s ease;
+}
+@media (max-width: 600px) { .notif-list { width: calc(100vw - 32px); right: -16px; } }
+.notif-wrap.open .notif-list { display: block; }
+.notif-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.notif-header h4 { font-size: 14px; font-weight: 700; }
+.notif-header .mark-all { color: var(--accent); font-size: 12px; cursor: pointer; background: none; border: none; }
+.notif-item { padding: 12px 16px; display: flex; gap: 12px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.notif-item:hover { background: rgba(255,255,255,0.03); }
+.notif-item.unread { background: rgba(20,184,166,0.05); }
+.notif-item .ic { width: 32px; height: 32px; border-radius: 50%; background: rgba(20,184,166,0.15); color: var(--accent); display: grid; place-items: center; font-size: 14px; flex-shrink: 0; }
+.notif-item .content { flex: 1; }
+.notif-item h5 { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.notif-item p { font-size: 12px; color: var(--text-muted); }
+.notif-item time { font-size: 11px; color: var(--text-muted); margin-top: 2px; display: block; }
+.notif-empty { padding: 40px 20px; text-align: center; color: var(--text-muted); }
+
+/* Mini Chart */
+.chart-wrap { padding: 8px 0; }
+.chart-svg { width: 100%; height: 60px; }
+.chart-legend { font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; margin-top: 4px; }
+
+/* Skeleton Loaders */
+@keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: calc(200px + 100%) 0; } }
+.skeleton { background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.1), rgba(255,255,255,0.04)); background-size: 200px 100%; animation: shimmer 1.5s infinite linear; border-radius: 6px; }
+.skel-line { height: 14px; margin: 8px 0; }
+.skel-line.short { width: 60%; }
+
+/* cPanel mockup styles */
+.cpanel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.cpanel-tile {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 12px; text-align: center; cursor: pointer; transition: all 0.2s;
+}
+.cpanel-tile:hover { background: rgba(20,184,166,0.08); border-color: var(--accent); transform: translateY(-2px); }
+.cpanel-tile .ic { font-size: 32px; margin-bottom: 8px; }
+.cpanel-tile h5 { font-size: 13px; font-weight: 600; }
+.cpanel-tile p { color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+
+/* DNS records styling */
+.dns-record { display: grid; grid-template-columns: 80px 1fr 1fr 80px 100px; gap: 12px; align-items: center; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.02); margin-bottom: 8px; font-size: 13px; }
+.dns-record .type { display: inline-block; padding: 4px 10px; border-radius: 6px; background: rgba(20,184,166,0.15); color: var(--accent); font-weight: 700; font-size: 11px; text-align: center; }
+@media (max-width: 768px) { .dns-record { grid-template-columns: 1fr; } }
+
+/* Backup card */
+.backup-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.backup-card .ic { width: 44px; height: 44px; border-radius: 10px; background: rgba(99,102,241,0.15); color: var(--secondary); display: grid; place-items: center; font-size: 20px; flex-shrink: 0; }
+.backup-card .info { flex: 1; min-width: 200px; }
+.backup-card h5 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.backup-card p { color: var(--text-muted); font-size: 12px; }
+.backup-card .actions { display: flex; gap: 8px; }
+
+/* Confetti */
+.confetti { position: fixed; top: -20px; width: 10px; height: 10px; z-index: 99999; pointer-events: none; animation: confettiFall 3s linear forwards; }
+@keyframes confettiFall { to { transform: translateY(105vh) rotate(720deg); opacity: 0; } }
+
+/* Tooltip */
+[data-tip] { position: relative; }
+[data-tip]:hover::after {
+    content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 50%;
+    transform: translateX(-50%); background: var(--dark); color: white;
+    padding: 6px 10px; border-radius: 6px; font-size: 11px; white-space: nowrap; z-index: 100;
+    pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Hover lift on stat cards */
+.dash-stat { transition: all 0.25s ease; cursor: default; }
+.dash-stat:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 12px 32px rgba(20,184,166,0.15); }
+
+/* Mobile bottom nav */
+.bottom-nav {
+    display: none; position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--bg-card); border-top: 1px solid var(--border);
+    padding: 8px; z-index: 80;
+    grid-template-columns: repeat(5, 1fr); gap: 4px;
+}
+.bottom-nav a {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 8px 4px; color: var(--text-muted); font-size: 10px; cursor: pointer;
+    border-radius: 8px; transition: all 0.2s;
+}
+.bottom-nav a.active, .bottom-nav a:hover { color: var(--accent); background: rgba(20,184,166,0.08); }
+.bottom-nav .ic { font-size: 18px; }
+@media (max-width: 968px) {
+    .bottom-nav { display: grid; }
+    .dash-main { padding-bottom: 80px; }
+}
+
 /* ============ MOBILE DASHBOARD DRAWER ============ */
 .dash-toggle {
     display: none; background: var(--bg-card); border: 1px solid var(--border); color: var(--text);
@@ -1353,6 +1516,9 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
                 <a data-section="hosting" onclick="switchDashSection('hosting', this)"><span class="ic">🌐</span> Hosting</a>
                 <a data-section="domain" onclick="switchDashSection('domain', this)"><span class="ic">🔗</span> Domain</a>
                 <a data-section="invoice" onclick="switchDashSection('invoice', this)"><span class="ic">📄</span> Invoice</a>
+                <a data-section="cpanel" onclick="switchDashSection('cpanel', this)"><span class="ic">🛠️</span> cPanel</a>
+                <a data-section="dns" onclick="switchDashSection('dns', this)"><span class="ic">🌍</span> DNS Manager</a>
+                <a data-section="backup" onclick="switchDashSection('backup', this)"><span class="ic">💾</span> Backup</a>
                 <a data-section="profile" onclick="switchDashSection('profile', this)"><span class="ic">👤</span> Profil</a>
                 <a onclick="navigate('paket')"><span class="ic">🛍️</span> Beli Paket</a>
                 <a onclick="logout()"><span class="ic">↪</span> Keluar</a>
@@ -1362,12 +1528,28 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
             <div class="dash-head">
                 <div style="display:flex;align-items:center;gap:12px;">
                     <button class="dash-toggle" onclick="toggleDashDrawer()" title="Menu">☰</button>
-                    <div>
-                        <h1 id="dashTitle">Selamat datang!</h1>
-                        <p id="dashSubtitle">Ini ringkasan akun Anda hari ini.</p>
+                    <div class="greeting-block">
+                        <span class="greeting-emoji" id="greetingEmoji">👋</span>
+                        <div class="greeting-text">
+                            <h1 id="dashTitle">Selamat datang!</h1>
+                            <p id="dashSubtitle">Ini ringkasan akun Anda hari ini.</p>
+                        </div>
                     </div>
                 </div>
                 <div style="display:flex;gap:12px;align-items:center;">
+                    <div class="notif-wrap" id="notifWrap">
+                        <button class="notif-btn" onclick="toggleNotif()" title="Notifikasi">
+                            🔔
+                            <span class="notif-badge" id="notifBadge">2</span>
+                        </button>
+                        <div class="notif-list">
+                            <div class="notif-header">
+                                <h4>Notifikasi</h4>
+                                <button class="mark-all" onclick="markAllRead()">Tandai semua dibaca</button>
+                            </div>
+                            <div id="notifItems"></div>
+                        </div>
+                    </div>
                     <button class="theme-toggle" onclick="toggleTheme()" title="Ubah tema">🌙</button>
                     <div class="user-dropdown" id="userDropdown">
                         <div class="dash-user user-dropdown-trigger" onclick="toggleUserMenu()">
@@ -1391,14 +1573,80 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
             </div>
 
             <section id="dash-overview" class="dash-section">
-                <div class="dash-stats">
-                    <div class="dash-stat"><div class="top"><div class="ic-wrap">🌐</div></div><h2 id="statHosting">0</h2><p>Hosting Aktif</p></div>
-                    <div class="dash-stat"><div class="top"><div class="ic-wrap purple">🔗</div></div><h2 id="statDomain">0</h2><p>Domain Terdaftar</p></div>
-                    <div class="dash-stat"><div class="top"><div class="ic-wrap orange">📄</div></div><h2 id="statInvoice">0</h2><p>Total Invoice</p></div>
-                    <div class="dash-stat"><div class="top"><div class="ic-wrap red">💰</div></div><h2 id="statTotal" style="font-size:24px;">Rp 0</h2><p>Total Pengeluaran</p></div>
+                <!-- Server Status Banner -->
+                <div class="server-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">All Systems Operational</span>
+                    <div class="status-meta">
+                        <span data-tip="Uptime 30 hari terakhir">🟢 Uptime 99.99%</span>
+                        <span data-tip="Response time average">⚡ &lt;200ms</span>
+                        <span data-tip="Server location">🇸🇬 Singapore DC</span>
+                    </div>
                 </div>
+
+                <!-- Stats -->
+                <div class="dash-stats">
+                    <div class="dash-stat" data-tip="Layanan hosting aktif kamu"><div class="top"><div class="ic-wrap">🌐</div></div><h2 id="statHosting" data-counter="0">0</h2><p>Hosting Aktif</p></div>
+                    <div class="dash-stat" data-tip="Domain yang kamu daftarkan"><div class="top"><div class="ic-wrap purple">🔗</div></div><h2 id="statDomain" data-counter="0">0</h2><p>Domain Terdaftar</p></div>
+                    <div class="dash-stat" data-tip="Total transaksi"><div class="top"><div class="ic-wrap orange">📄</div></div><h2 id="statInvoice" data-counter="0">0</h2><p>Total Invoice</p></div>
+                    <div class="dash-stat" data-tip="Akumulasi pembelian"><div class="top"><div class="ic-wrap red">💰</div></div><h2 id="statTotal" style="font-size:24px;">Rp 0</h2><p>Total Pengeluaran</p></div>
+                </div>
+
+                <!-- Resource Usage + Quick Actions Row -->
+                <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:24px;" id="overviewRow1">
+                    <div class="dash-card" style="margin-bottom:0;">
+                        <div class="dash-card-head">
+                            <h3>📊 Resource Usage</h3>
+                            <small style="color:var(--text-muted);font-size:12px;">Real-time</small>
+                        </div>
+                        <div id="resourceUsage">
+                            <div class="resource-item">
+                                <div class="resource-label"><span class="name">💾 Disk Space (NVMe SSD)</span><span class="val">2.4 / 10 GB</span></div>
+                                <div class="progress-bar"><div class="progress-fill" style="width:24%"></div></div>
+                            </div>
+                            <div class="resource-item">
+                                <div class="resource-label"><span class="name">🌐 Bandwidth (Bulan ini)</span><span class="val">12 / 100 GB</span></div>
+                                <div class="progress-bar"><div class="progress-fill" style="width:12%"></div></div>
+                            </div>
+                            <div class="resource-item">
+                                <div class="resource-label"><span class="name">📧 Email Accounts</span><span class="val">3 / Unlimited</span></div>
+                                <div class="progress-bar"><div class="progress-fill" style="width:8%"></div></div>
+                            </div>
+                            <div class="resource-item">
+                                <div class="resource-label"><span class="name">🗄️ Database MySQL</span><span class="val">3 / 10</span></div>
+                                <div class="progress-bar"><div class="progress-fill" style="width:30%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dash-card" style="margin-bottom:0;">
+                        <div class="dash-card-head"><h3>⚡ Quick Actions</h3></div>
+                        <div class="quick-actions">
+                            <button class="qa-btn" onclick="openCpanel()" data-tip="Akses cPanel"><span class="ic">🛠️</span><span>cPanel</span></button>
+                            <button class="qa-btn" onclick="switchDashSection('cpanel', document.querySelector('.dash-menu a[data-section=cpanel]'))"><span class="ic">🗂️</span><span>File Manager</span></button>
+                            <button class="qa-btn" onclick="switchDashSection('dns', document.querySelector('.dash-menu a[data-section=dns]'))"><span class="ic">🌍</span><span>DNS</span></button>
+                            <button class="qa-btn" onclick="switchDashSection('backup', document.querySelector('.dash-menu a[data-section=backup]'))"><span class="ic">💾</span><span>Backup</span></button>
+                            <button class="qa-btn" onclick="navigate('paket')"><span class="ic">📈</span><span>Upgrade</span></button>
+                            <button class="qa-btn" onclick="infoModal('Support', 'Email: support@zentra.id\nWA: +62 812-3456-7890\n\nResponse time: 24/7 dalam 1 jam.', '💬')"><span class="ic">💬</span><span>Support</span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mini Chart + Activity -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;" id="overviewRow2">
+                    <div class="dash-card" style="margin-bottom:0;">
+                        <div class="dash-card-head"><h3>📈 Traffic 7 Hari</h3><small style="color:var(--success);font-size:12px;">↑ 24%</small></div>
+                        <div class="chart-wrap" id="trafficChart"></div>
+                        <div class="chart-legend"><span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span><span>Min</span></div>
+                    </div>
+                    <div class="dash-card" style="margin-bottom:0;">
+                        <div class="dash-card-head"><h3>🕐 Aktivitas Terbaru</h3></div>
+                        <div id="activityTimeline"></div>
+                    </div>
+                </div>
+
+                <!-- Recent Services -->
                 <div class="dash-card">
-                    <div class="dash-card-head"><h3>Layanan Terbaru</h3><a class="btn btn-primary" onclick="navigate('paket')">+ Beli Paket</a></div>
+                    <div class="dash-card-head"><h3>📦 Layanan Terbaru</h3><a class="btn btn-primary" onclick="navigate('paket')">+ Beli Paket</a></div>
                     <div id="recentServices"></div>
                 </div>
             </section>
@@ -1424,6 +1672,48 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
                 </div>
             </section>
 
+            <section id="dash-cpanel" class="dash-section" style="display:none;">
+                <div class="dash-card">
+                    <div class="dash-card-head">
+                        <h3>🛠️ cPanel Control Panel</h3>
+                        <span class="status status-active">🟢 Connected</span>
+                    </div>
+                    <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">Kelola hosting kamu dengan tools profesional. Akses lengkap ke file, database, email, dan konfigurasi server.</p>
+                    <div class="cpanel-grid">
+                        <div class="cpanel-tile" onclick="infoModal('File Manager', 'Akses dan kelola semua file hosting kamu.\\n\\n• 2.4 GB dari 10 GB digunakan\\n• 1,247 file dalam public_html\\n• Last modified: hari ini', '🗂️')"><div class="ic">🗂️</div><h5>File Manager</h5><p>2.4 GB</p></div>
+                        <div class="cpanel-tile" onclick="infoModal('MySQL Databases', 'Database PostgreSQL terhubung ke Supabase.\\n\\n• zentra_main (active)\\n• zentra_logs (active)\\n• zentra_cache (active)', '🗄️')"><div class="ic">🗄️</div><h5>MySQL</h5><p>3 databases</p></div>
+                        <div class="cpanel-tile" onclick="infoModal('Email Manager', 'Buat email professional dengan domain kamu.\\n\\n• admin@zentra.id\\n• support@zentra.id\\n• info@zentra.id', '📧')"><div class="ic">📧</div><h5>Email</h5><p>3 accounts</p></div>
+                        <div class="cpanel-tile" onclick="infoModal('SSL/TLS', 'Sertifikat SSL gratis dari Let\\'s Encrypt.\\n\\n• Status: Active 🟢\\n• Expires: 90 days\\n• Auto-renew: ON', '🔐')"><div class="ic">🔐</div><h5>SSL/TLS</h5><p>Active</p></div>
+                        <div class="cpanel-tile" onclick="infoModal('Subdomains', 'Buat subdomain untuk staging/blog/dll.\\n\\n• www.zentrahost.com\\n• blog.zentrahost.com\\n• shop.zentrahost.com', '🔗')"><div class="ic">🔗</div><h5>Subdomain</h5><p>3 active</p></div>
+                        <div class="cpanel-tile" onclick="infoModal('PHP Version', 'Pilih versi PHP untuk website kamu.\\n\\nCurrent: PHP 8.3\\nAvailable: 7.4, 8.0, 8.1, 8.2, 8.3', '🐘')"><div class="ic">🐘</div><h5>PHP Version</h5><p>v8.3</p></div>
+                        <div class="cpanel-tile" onclick="infoModal('Cron Jobs', 'Jadwalkan tugas otomatis di server.\\n\\n• Backup harian (active)\\n• Cache cleanup (active)\\n• Health check (active)', '⏰')"><div class="ic">⏰</div><h5>Cron Jobs</h5><p>3 jobs</p></div>
+                        <div class="cpanel-tile" onclick="infoModal('Statistics', 'Visitor stats real-time.\\n\\n• Today: 124 visitors\\n• Week: 892 visitors\\n• Bandwidth: 12.4 GB', '📊')"><div class="ic">📊</div><h5>Statistics</h5><p>Live</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="dash-dns" class="dash-section" style="display:none;">
+                <div class="dash-card">
+                    <div class="dash-card-head">
+                        <h3>🌍 DNS Manager</h3>
+                        <button class="btn btn-primary" onclick="infoModal('Add DNS Record', 'Form tambah DNS record akan dibuka.\\n\\nSaat ini fitur ini dalam mode demo. Untuk production, integrasi dengan Cloudflare API atau registrar API diperlukan.', '🌍')">+ Add Record</button>
+                    </div>
+                    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">Kelola DNS records untuk domain zentrahost.com</p>
+                    <div id="dnsRecords"></div>
+                </div>
+            </section>
+
+            <section id="dash-backup" class="dash-section" style="display:none;">
+                <div class="dash-card">
+                    <div class="dash-card-head">
+                        <h3>💾 Backup Manager</h3>
+                        <button class="btn btn-primary" onclick="confirmModal('Buat Backup?', 'Sistem akan membuat backup lengkap (files + database + email).\\n\\nEstimasi waktu: 2-3 menit.\\nUkuran: ~2.5 GB', () => { showToast('✓ Backup dimulai. Notifikasi akan dikirim saat selesai.', 'success', 5000); }, 'Mulai Backup')">+ Buat Backup Baru</button>
+                    </div>
+                    <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">Backup otomatis harian. Tersimpan 30 hari terakhir.</p>
+                    <div id="backupList"></div>
+                </div>
+            </section>
+
             <section id="dash-profile" class="dash-section" style="display:none;">
                 <div class="dash-card">
                     <div class="dash-card-head"><h3>Informasi Profil</h3></div>
@@ -1432,6 +1722,14 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
             </section>
         </main>
     </div>
+    <!-- Mobile Bottom Nav -->
+    <nav class="bottom-nav" id="bottomNav">
+        <a data-section="overview" onclick="switchDashSection('overview', document.querySelector('.dash-menu a[data-section=overview]'))"><span class="ic">⚡</span><span>Overview</span></a>
+        <a data-section="hosting" onclick="switchDashSection('hosting', document.querySelector('.dash-menu a[data-section=hosting]'))"><span class="ic">🌐</span><span>Hosting</span></a>
+        <a data-section="cpanel" onclick="switchDashSection('cpanel', document.querySelector('.dash-menu a[data-section=cpanel]'))"><span class="ic">🛠️</span><span>cPanel</span></a>
+        <a data-section="invoice" onclick="switchDashSection('invoice', document.querySelector('.dash-menu a[data-section=invoice]'))"><span class="ic">📄</span><span>Invoice</span></a>
+        <a data-section="profile" onclick="switchDashSection('profile', document.querySelector('.dash-menu a[data-section=profile]'))"><span class="ic">👤</span><span>Profil</span></a>
+    </nav>
 </div>
 
 <script>
@@ -2142,7 +2440,8 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
             return;
         }
         const invoiceNo = 'INV-' + String(data.id).padStart(6, '0');
-        showAlert('checkoutAlert', `<strong>✓ Pembayaran berhasil!</strong> Invoice <strong>${invoiceNo}</strong> dibuat. Layanan aktif. Mengalihkan ke dashboard...`, 'success');
+        showAlert('checkoutAlert', `<strong>🎉 Pembayaran berhasil!</strong> Invoice <strong>${invoiceNo}</strong> dibuat. Layanan aktif. Mengalihkan ke dashboard...`, 'success');
+        confetti(80); // 🎊 Celebrate!
         pendingOrder = null;
         setTimeout(() => navigate('dashboard'), 2200);
     } finally {
@@ -2150,6 +2449,194 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
         btn.innerHTML = orig;
     }
 });
+
+// === DASHBOARD ENHANCEMENTS ===
+function getGreeting() {
+    const h = new Date().getHours();
+    if (h < 11) return { text: 'Selamat pagi', emoji: '☀️' };
+    if (h < 15) return { text: 'Selamat siang', emoji: '🌤️' };
+    if (h < 18) return { text: 'Selamat sore', emoji: '🌅' };
+    return { text: 'Selamat malam', emoji: '🌙' };
+}
+
+function animateCounter(el, target, duration = 800) {
+    if (!el) return;
+    const start = 0;
+    const startTime = performance.now();
+    function step(now) {
+        const t = Math.min(1, (now - startTime) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = Math.floor(start + (target - start) * eased);
+        if (t < 1) requestAnimationFrame(step);
+        else el.textContent = target;
+    }
+    requestAnimationFrame(step);
+}
+
+function renderMiniChart(elId, data) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const max = Math.max(...data, 1);
+    const w = 100, h = 60, gap = 2, barW = (w - gap * (data.length - 1)) / data.length;
+    const bars = data.map((v, i) => {
+        const bh = (v / max) * (h - 8);
+        const x = i * (barW + gap);
+        const y = h - bh;
+        return `<rect x="${x}" y="${y}" width="${barW}" height="${bh}" rx="2" fill="url(#chartGrad)"/>`;
+    }).join('');
+    el.innerHTML = `
+        <svg class="chart-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+            <defs><linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#14b8a6"/><stop offset="100%" stop-color="#6366f1"/></linearGradient></defs>
+            ${bars}
+        </svg>`;
+}
+
+function renderActivity() {
+    const el = document.getElementById('activityTimeline');
+    if (!el) return;
+    const orders = currentUser ? null : null; // Will populate from real data below
+    const activities = [
+        { icon: '🛒', cls: '', title: 'Pembelian paket berhasil', desc: 'Business / Shared Hosting', time: 'Baru saja' },
+        { icon: '👤', cls: 'purple', title: 'Profil diperbarui', desc: 'Update informasi akun', time: '5 menit lalu' },
+        { icon: '🔐', cls: 'orange', title: 'Login dari device baru', desc: 'Google OAuth · Chrome', time: '1 jam lalu' },
+        { icon: '✅', cls: '', title: 'Akun terverifikasi', desc: 'Email verifikasi sukses', time: 'Kemarin' }
+    ];
+    el.innerHTML = activities.map(a => `
+        <div class="timeline-item">
+            <div class="timeline-icon ${a.cls}">${a.icon}</div>
+            <div class="timeline-content">
+                <h5>${a.title}</h5>
+                <p>${a.desc}</p>
+                <time class="timeline-time">${a.time}</time>
+            </div>
+        </div>
+    `).join('');
+}
+
+// === NOTIFICATIONS ===
+let notifications = [
+    { id: 1, icon: '🎉', title: 'Selamat datang di Zentra!', desc: 'Akun kamu sudah aktif. Yuk eksplorasi fitur lengkap kami.', time: 'Baru saja', unread: true },
+    { id: 2, icon: '🛒', title: 'Pembelian Business sukses', desc: 'Invoice INV-000001 telah dibuat. Layanan aktif.', time: '5 menit lalu', unread: true },
+    { id: 3, icon: '💡', title: 'Tips: Aktifkan 2FA', desc: 'Tingkatkan keamanan akun dengan two-factor authentication.', time: '1 jam lalu', unread: false },
+    { id: 4, icon: '📢', title: 'Update sistem', desc: 'Server di-upgrade ke NVMe Gen 4. Performa naik 30%!', time: 'Kemarin', unread: false }
+];
+
+function renderNotifications() {
+    const el = document.getElementById('notifItems');
+    const badge = document.getElementById('notifBadge');
+    if (!el) return;
+    const unreadCount = notifications.filter(n => n.unread).length;
+    if (badge) {
+        badge.textContent = unreadCount;
+        badge.style.display = unreadCount > 0 ? 'grid' : 'none';
+    }
+    if (notifications.length === 0) {
+        el.innerHTML = '<div class="notif-empty">📭<br>Belum ada notifikasi</div>';
+        return;
+    }
+    el.innerHTML = notifications.map(n => `
+        <div class="notif-item ${n.unread ? 'unread' : ''}" onclick="markRead(${n.id})">
+            <div class="ic">${n.icon}</div>
+            <div class="content">
+                <h5>${n.title}</h5>
+                <p>${n.desc}</p>
+                <time>${n.time}</time>
+            </div>
+        </div>
+    `).join('');
+}
+
+function toggleNotif() {
+    const w = document.getElementById('notifWrap');
+    if (w) w.classList.toggle('open');
+}
+function markRead(id) {
+    const n = notifications.find(x => x.id === id);
+    if (n) n.unread = false;
+    renderNotifications();
+}
+function markAllRead() {
+    notifications.forEach(n => n.unread = false);
+    renderNotifications();
+    showToast('Semua notifikasi ditandai dibaca', 'success');
+}
+
+// Click outside closes notif
+document.addEventListener('click', e => {
+    const w = document.getElementById('notifWrap');
+    if (w && w.classList.contains('open') && !w.contains(e.target)) w.classList.remove('open');
+});
+
+// === CONFETTI EFFECT ===
+function confetti(count = 60) {
+    const colors = ['#14b8a6', '#6366f1', '#ec4899', '#f59e0b', '#10b981'];
+    for (let i = 0; i < count; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.animationDuration = (2 + Math.random() * 2) + 's';
+        c.style.animationDelay = Math.random() * 0.5 + 's';
+        c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 5000);
+    }
+}
+
+// === cPanel / DNS / Backup ===
+function openCpanel() {
+    infoModal('cPanel Login', '🛠️ Mengarahkan ke cPanel...\\n\\nUsername: ' + (currentUser ? currentUser.email.split('@')[0] : 'user') + '\\nServer: srv01.zentra.id\\nPort: 2083 (SSL)\\n\\nKlik OK untuk masuk dashboard cPanel mockup di sidebar.', '🛠️');
+    setTimeout(() => switchDashSection('cpanel', document.querySelector('.dash-menu a[data-section=cpanel]')), 300);
+}
+
+function renderDNS() {
+    const el = document.getElementById('dnsRecords');
+    if (!el) return;
+    const records = [
+        { type: 'A', name: '@', value: '103.124.95.42', ttl: '3600', editable: false },
+        { type: 'A', name: 'www', value: '103.124.95.42', ttl: '3600', editable: true },
+        { type: 'CNAME', name: 'blog', value: 'zentrahost.com', ttl: '3600', editable: true },
+        { type: 'CNAME', name: 'shop', value: 'shopify.zentrahost.com', ttl: '3600', editable: true },
+        { type: 'MX', name: '@', value: 'mail.zentrahost.com', ttl: '3600', editable: true },
+        { type: 'TXT', name: '@', value: 'v=spf1 include:_spf.google.com', ttl: '3600', editable: true }
+    ];
+    el.innerHTML = records.map((r, i) => `
+        <div class="dns-record">
+            <span class="type">${r.type}</span>
+            <span><strong>${r.name}</strong></span>
+            <span style="color:var(--text-muted);font-size:12px;word-break:break-all;">${r.value}</span>
+            <span style="color:var(--text-muted);font-size:12px;">TTL ${r.ttl}</span>
+            <span style="display:flex;gap:6px;">
+                ${r.editable ? `<button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" onclick="infoModal('Edit DNS', 'Form edit record DNS akan dibuka.', '🌍')">Edit</button>` : '<span class="status status-active">System</span>'}
+            </span>
+        </div>
+    `).join('');
+}
+
+function renderBackup() {
+    const el = document.getElementById('backupList');
+    if (!el) return;
+    const backups = [
+        { date: '07 Jun 2026, 02:00', size: '2.4 GB', type: 'Full', auto: true, status: 'success' },
+        { date: '06 Jun 2026, 02:00', size: '2.3 GB', type: 'Full', auto: true, status: 'success' },
+        { date: '05 Jun 2026, 02:00', size: '2.3 GB', type: 'Full', auto: true, status: 'success' },
+        { date: '04 Jun 2026, 14:30', size: '2.1 GB', type: 'Manual', auto: false, status: 'success' },
+        { date: '03 Jun 2026, 02:00', size: '2.0 GB', type: 'Incremental', auto: true, status: 'success' }
+    ];
+    el.innerHTML = backups.map(b => `
+        <div class="backup-card">
+            <div class="ic">${b.auto ? '🤖' : '🖱️'}</div>
+            <div class="info">
+                <h5>${b.type} Backup ${b.auto ? '(Auto)' : '(Manual)'}</h5>
+                <p>${b.date} · ${b.size} · <span class="status status-active">${b.status === 'success' ? '✓ Success' : 'Failed'}</span></p>
+            </div>
+            <div class="actions">
+                <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;" onclick="confirmModal('Restore Backup?', 'Mengembalikan ke kondisi backup tanggal ${b.date}.\\n\\nSemua perubahan setelah waktu ini akan hilang.', () => showToast('Restore dimulai. Estimasi 5 menit.', 'info'))">Restore</button>
+                <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;" onclick="showToast('Download backup dimulai (${b.size})', 'success')">Download</button>
+            </div>
+        </div>
+    `).join('');
+}
 
 // === DASHBOARD ===
 async function renderDashboard() {
@@ -2164,15 +2651,28 @@ async function renderDashboard() {
     document.getElementById('dashUserName').textContent = user.fullname;
     document.getElementById('dashUserEmail').textContent = user.email;
     document.getElementById('dashAvatar').textContent = (user.fullname || 'U').charAt(0).toUpperCase();
+    // Greeting personal time-aware
+    const g = getGreeting();
+    document.getElementById('greetingEmoji').textContent = g.emoji;
+    document.getElementById('dashTitle').textContent = `${g.text}, ${user.fullname.split(' ')[0]}!`;
+    // Notifications
+    renderNotifications();
+    // Activity timeline
+    renderActivity();
+    // Mini chart traffic
+    renderMiniChart('trafficChart', [42, 58, 47, 65, 71, 89, 95]);
     await renderOverview();
 }
 
 async function switchDashSection(sec, el) {
     document.querySelectorAll('.dash-menu a').forEach(a => a.classList.remove('active'));
     if (el) el.classList.add('active');
+    // Sync bottom nav active state
+    document.querySelectorAll('.bottom-nav a').forEach(a => a.classList.toggle('active', a.dataset.section === sec));
     document.querySelectorAll('.dash-section').forEach(s => s.style.display = 'none');
-    document.getElementById('dash-' + sec).style.display = 'block';
-    // Auto-close mobile drawer setelah pilih menu
+    const targetSec = document.getElementById('dash-' + sec);
+    if (targetSec) targetSec.style.display = 'block';
+    // Auto-close mobile drawer
     const side = document.querySelector('.dash-side');
     const backdrop = document.getElementById('dashBackdrop');
     if (side && side.classList.contains('open')) {
@@ -2180,18 +2680,33 @@ async function switchDashSection(sec, el) {
         backdrop.classList.remove('show');
     }
     const titles = {
-        overview: ['Selamat datang!', 'Ini ringkasan akun Anda hari ini.'],
+        overview: ['Dashboard', 'Ini ringkasan akun Anda hari ini.'],
         hosting: ['Hosting Saya', 'Kelola semua layanan hosting Anda.'],
         domain: ['Domain Saya', 'Daftar domain yang Anda miliki.'],
         invoice: ['Invoice', 'Riwayat transaksi & pembayaran.'],
+        cpanel: ['cPanel', 'Control panel hosting lengkap.'],
+        dns: ['DNS Manager', 'Kelola DNS records domain Anda.'],
+        backup: ['Backup Manager', 'Backup otomatis & restore.'],
         profile: ['Profil', 'Atur informasi akun Anda.']
     };
-    document.getElementById('dashTitle').textContent = titles[sec][0];
-    document.getElementById('dashSubtitle').textContent = titles[sec][1];
+    const t = titles[sec] || titles.overview;
+    if (sec === 'overview') {
+        const user = getUser();
+        const g = getGreeting();
+        document.getElementById('greetingEmoji').textContent = g.emoji;
+        document.getElementById('dashTitle').textContent = user ? `${g.text}, ${user.fullname.split(' ')[0]}!` : t[0];
+    } else {
+        document.getElementById('greetingEmoji').textContent = '📊';
+        document.getElementById('dashTitle').textContent = t[0];
+    }
+    document.getElementById('dashSubtitle').textContent = t[1];
     if (sec === 'overview') await renderOverview();
     if (sec === 'hosting') await renderHosting();
     if (sec === 'domain') await renderDomainList();
     if (sec === 'invoice') await renderInvoice();
+    if (sec === 'cpanel') { /* static mockup, no fetch */ }
+    if (sec === 'dns') renderDNS();
+    if (sec === 'backup') renderBackup();
     if (sec === 'profile') renderProfile();
 }
 
@@ -2200,9 +2715,10 @@ async function renderOverview() {
     const hosting = orders.filter(o => o.type !== 'domain');
     const domain = orders.filter(o => o.type === 'domain');
     const total = orders.reduce((s, o) => s + Number(o.price), 0);
-    document.getElementById('statHosting').textContent = hosting.length;
-    document.getElementById('statDomain').textContent = domain.length;
-    document.getElementById('statInvoice').textContent = orders.length;
+    // Animated counters
+    animateCounter(document.getElementById('statHosting'), hosting.length);
+    animateCounter(document.getElementById('statDomain'), domain.length);
+    animateCounter(document.getElementById('statInvoice'), orders.length);
     document.getElementById('statTotal').textContent = fmtRp(total);
 
     // Order sudah descending dari getOrders, ambil 5 teratas
