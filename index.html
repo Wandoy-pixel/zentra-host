@@ -1751,9 +1751,14 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         return;
     }
     await refreshSession();
+    // Pastikan currentUser benar-benar ready (retry kalau koneksi lambat)
+    if (!currentUser) {
+        await new Promise(r => setTimeout(r, 500));
+        await refreshSession();
+    }
     const name = (currentUser && currentUser.fullname) || email;
     showAlert('loginAlert', `Selamat datang, ${name}!`, 'success');
-    setTimeout(() => navigate('dashboard'), 800);
+    setTimeout(() => navigate('dashboard'), 600);
 });
 
 // === REGISTER ===
@@ -1895,6 +1900,11 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
 // === DASHBOARD ===
 async function renderDashboard() {
     if (!currentUser) await refreshSession();
+    // Retry sekali kalau masih null (kasus mobile/koneksi lambat)
+    if (!currentUser) {
+        await new Promise(r => setTimeout(r, 600));
+        await refreshSession();
+    }
     const user = getUser();
     if (!user) { navigate('login'); return; }
     document.getElementById('dashUserName').textContent = user.fullname;
