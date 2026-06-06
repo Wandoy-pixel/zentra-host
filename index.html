@@ -1033,7 +1033,33 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
     .dash { grid-template-columns: 1fr; }
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- ============ SAFETY NET SCRIPT (runs FIRST, independent dari main script) ============ -->
+<script>
+// Last-resort fallback: kalau dalam 2 detik gak ada layout yang aktif, force show home
+window.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        try {
+            if (!document.querySelector('.layout.active')) {
+                console.warn('[safety-net] No active layout detected, forcing home page render');
+                var pub = document.getElementById('layout-public');
+                var home = document.getElementById('page-home');
+                if (pub) pub.classList.add('active');
+                if (home) home.classList.add('active');
+            }
+        } catch (e) { console.error('[safety-net]', e); }
+    }, 2000);
+});
+window.__sbCdnFailed = false;
+</script>
+<!-- Supabase CDN with onerror tracking -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="window.__sbCdnFailed=true;console.error('[Supabase CDN] gagal load dari jsdelivr - mungkin diblokir ad-blocker')"></script>
+<!-- Fallback CDN dari unpkg kalau jsdelivr gagal -->
+<script>
+if (typeof supabase === 'undefined' || window.__sbCdnFailed) {
+    console.warn('[Supabase] Trying fallback CDN unpkg...');
+    document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');
+}
+</script>
 </head>
 <body>
 <div class="mesh-bg"></div>
