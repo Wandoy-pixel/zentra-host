@@ -1738,7 +1738,29 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 // === Supabase Client ===
 const SUPABASE_URL = 'https://nkzfgcdwyckzgxcdvumu.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_AfrAQS2tzjBx6ac7rbLj1Q_H8vv49TD';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let sb;
+try {
+    if (typeof supabase === 'undefined') throw new Error('Supabase SDK gagal load dari CDN');
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch (e) {
+    console.error('[Supabase init]', e);
+    // Stub minimal supaya kode lain gak crash, tampilkan home page
+    sb = {
+        auth: {
+            getSession: async () => ({ data: { session: null } }),
+            signInWithPassword: async () => ({ error: { message: 'Layanan tidak tersedia' } }),
+            signUp: async () => ({ error: { message: 'Layanan tidak tersedia' } }),
+            signInWithOAuth: async () => ({ error: { message: 'Layanan tidak tersedia' } }),
+            signOut: async () => {},
+            onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
+        },
+        from: () => ({
+            select: () => ({ eq: () => ({ single: async () => ({ data: null, error: null }), order: () => ({ data: [], error: null }) }) }),
+            insert: () => ({ select: () => ({ single: async () => ({ data: null, error: { message: 'Layanan tidak tersedia' } }) }) }),
+            update: () => ({ eq: () => ({ data: null, error: null }) })
+        })
+    };
+}
 
 // In-memory cache untuk session user (di-refresh oleh refreshSession + onAuthStateChange)
 let currentUser = null;
@@ -1751,17 +1773,22 @@ const KEYS = {
 
 // === Theme Toggle ===
 function applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem(KEYS.theme, theme);
+    try { document.documentElement.setAttribute('data-theme', theme); } catch(_) {}
+    try { localStorage.setItem(KEYS.theme, theme); } catch(_) {}
     const icon = theme === 'light' ? '☀️' : '🌙';
-    document.querySelectorAll('.theme-toggle').forEach(b => b.textContent = icon);
+    try { document.querySelectorAll('.theme-toggle').forEach(b => b.textContent = icon); } catch(_) {}
 }
 function toggleTheme() {
     const current = document.documentElement.getAttribute('data-theme') || 'dark';
     applyTheme(current === 'dark' ? 'light' : 'dark');
 }
-// Init theme ASAP (avoid flash)
-applyTheme(localStorage.getItem(KEYS.theme) || 'dark');
+// Init theme ASAP (avoid flash) — defensive: localStorage might fail in private mode
+try {
+    applyTheme((typeof localStorage !== 'undefined' && localStorage.getItem(KEYS.theme)) || 'dark');
+} catch (e) {
+    console.warn('[applyTheme init]', e);
+    document.documentElement.setAttribute('data-theme', 'dark');
+}
 
 // === Error Translator (English -> Indonesian) ===
 function translateError(error) {
@@ -1969,13 +1996,20 @@ async function renderPage(page) {
 
     // Auth-gate via Supabase session
     if (route.requireAuth) {
-        const { data: { session } } = await sb.auth.getSession();
+        let session = null;
+        try {
+            const res = await sb.auth.getSession();
+            session = res && res.data ? res.data.session : null;
+        } catch (e) {
+            console.warn('[renderPage getSession]', e);
+        }
         if (!session) {
-            showAlert('loginAlert', 'Silakan login terlebih dahulu', 'info');
+            // defer showAlert sampai layout login mounted
+            setTimeout(() => { try { showAlert('loginAlert', 'Silakan login terlebih dahulu', 'info'); } catch(_) {} }, 0);
             page = 'login';
         } else if (!currentUser) {
             // Session valid tapi cache kosong (race condition) - refresh dulu
-            await refreshSession();
+            try { await refreshSession(); } catch (e) { console.warn('[renderPage refreshSession]', e); }
         }
     }
 
@@ -2842,6 +2876,8 @@ async function showDetail(id) {
 }
 
 // === Auth State Listener ===
+// Declare authInitialized BEFORE listener (anti TDZ error kalau callback fire sync)
+let authInitialized = false;
 sb.auth.onAuthStateChange(async (event, session) => {
     if (session && session.user) {
         await refreshSession();
@@ -2870,8 +2906,23 @@ sb.auth.onAuthStateChange(async (event, session) => {
     }
 });
 
+// === EMERGENCY SAFETY NET ===
+// Sebelum init() jalan, pastikan home page TAMPIL apapun yang terjadi.
+// Kalau init() berhasil, dia akan re-render ke page yang benar.
+(function showHomeImmediately() {
+    try {
+        const layoutPub = document.getElementById('layout-public');
+        const pageHome = document.getElementById('page-home');
+        if (layoutPub && !layoutPub.classList.contains('active')) {
+            layoutPub.classList.add('active');
+        }
+        if (pageHome && !pageHome.classList.contains('active')) {
+            pageHome.classList.add('active');
+        }
+    } catch (e) { console.warn('[safety net]', e); }
+})();
+
 // === Initial Load ===
-let authInitialized = false;
 (async function init() {
     try {
         await refreshSession();
@@ -2886,15 +2937,36 @@ let authInitialized = false;
         console.error('[init renderPage]', e);
         // Fallback hard-reset: pastikan setidaknya home page tampil
         try { await renderPage('home'); } catch (_) {
-            document.querySelectorAll('.layout').forEach(l => l.classList.remove('active'));
-            const pub = document.getElementById('layout-public');
-            if (pub) pub.classList.add('active');
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            const home = document.getElementById('page-home');
-            if (home) home.classList.add('active');
+            try {
+                document.querySelectorAll('.layout').forEach(l => l.classList.remove('active'));
+                const pub = document.getElementById('layout-public');
+                if (pub) pub.classList.add('active');
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                const home = document.getElementById('page-home');
+                if (home) home.classList.add('active');
+            } catch (_) {}
         }
     }
 })();
+
+// === ULTIMATE SAFETY NET ===
+// Kalau setelah 2 detik tidak ada layout .active sama sekali (init() hang/crash di tempat tak terduga),
+// paksa render home page raw DOM. Ini guarantee user tidak pernah lihat blank screen.
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        try {
+            if (!document.querySelector('.layout.active')) {
+                console.warn('[ultimate safety-net] No active layout after 2s — forcing home');
+                document.querySelectorAll('.layout').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                const pub = document.getElementById('layout-public');
+                const home = document.getElementById('page-home');
+                if (pub) pub.classList.add('active');
+                if (home) home.classList.add('active');
+            }
+        } catch (e) { console.warn('[ultimate safety-net]', e); }
+    }, 2000);
+});
 </script>
 </body>
 </html>
