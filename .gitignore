@@ -1,0 +1,28 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Env files (jangan commit credentials!)
+.env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel
+
+# Build output
+dist/
+build/

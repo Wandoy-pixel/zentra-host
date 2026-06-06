@@ -1,0 +1,2071 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zentra Host — Infrastruktur Web Generasi Baru</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ============ ZENTRA HOST - ALL IN ONE STYLES ============ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root, [data-theme="dark"] {
+    --bg: #0a0e1a;
+    --bg-card: #131829;
+    --surface: #1a2138;
+    --border: rgba(255,255,255,0.08);
+    --text: #e6e9f2;
+    --text-muted: #8b93a7;
+    --text-dark: #0a0e1a;
+    --navbar-bg: rgba(10,14,26,0.7);
+    --input-bg: #131829;
+    --mesh-opacity: 0.25;
+    --accent: #14b8a6;
+    --secondary: #6366f1;
+    --gradient: linear-gradient(135deg, #14b8a6 0%, #6366f1 100%);
+    --gradient-text: linear-gradient(135deg, #14b8a6 0%, #8b5cf6 50%, #ec4899 100%);
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --radius: 14px;
+    --radius-sm: 8px;
+}
+[data-theme="light"] {
+    --bg: #f8fafc;
+    --bg-card: #ffffff;
+    --surface: #f1f5f9;
+    --border: rgba(0,0,0,0.08);
+    --text: #0a0e1a;
+    --text-muted: #64748b;
+    --text-dark: #0a0e1a;
+    --navbar-bg: rgba(255,255,255,0.85);
+    --input-bg: #ffffff;
+    --mesh-opacity: 0.12;
+}
+[data-theme="light"] body { background: var(--bg); }
+[data-theme="light"] .navbar { box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+[data-theme="light"] .bento-item, [data-theme="light"] .price-card, [data-theme="light"] .test-card, [data-theme="light"] .dash-card, [data-theme="light"] .dash-stat, [data-theme="light"] .ck-card, [data-theme="light"] details.faq { box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+[data-theme="light"] .dash-side { background: var(--bg-card); }
+[data-theme="light"] .domain-form input, [data-theme="light"] .domain-form select { background: var(--surface); }
+
+/* Theme toggle button */
+.theme-toggle {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); transform: rotate(15deg); }
+.theme-toggle.in-sidebar {
+    width: auto;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    margin: 8px 12px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-start;
+    font-size: 14px;
+    font-weight: 500;
+}
+html { scroll-behavior: smooth; }
+body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+.container { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+
+/* Page system */
+.page { display: none; animation: fadeIn 0.3s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.layout { display: none; }
+.layout.active { display: block; }
+
+/* Mesh BG */
+.mesh-bg {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+.mesh-bg::before, .mesh-bg::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: var(--mesh-opacity);
+}
+.mesh-bg::before { width: 500px; height: 500px; background: var(--accent); top: -100px; left: -100px; }
+.mesh-bg::after { width: 500px; height: 500px; background: var(--secondary); bottom: -100px; right: -100px; }
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    text-align: center;
+    justify-content: center;
+}
+.btn-primary {
+    background: var(--gradient);
+    color: white;
+    box-shadow: 0 8px 24px rgba(20,184,166,0.4);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(20,184,166,0.5); }
+.btn-ghost { background: rgba(255,255,255,0.05); color: var(--text); border: 1px solid var(--border); }
+.btn-ghost:hover { background: rgba(255,255,255,0.1); }
+.btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+.btn-outline:hover { background: var(--accent); color: white; }
+.btn-lg { padding: 16px 28px; font-size: 15px; }
+.btn-block { display: flex; width: 100%; }
+
+/* Navbar */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--navbar-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+}
+.nav-container { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; }
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    cursor: pointer;
+}
+.logo-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--gradient);
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    color: white;
+    box-shadow: 0 4px 16px rgba(20,184,166,0.4);
+}
+.nav-menu { display: flex; gap: 8px; }
+.nav-menu a {
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.nav-menu a:hover, .nav-menu a.active { background: rgba(255,255,255,0.05); color: var(--text); }
+.nav-auth { display: flex; gap: 10px; align-items: center; }
+.nav-toggle {
+    display: none;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: white;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+/* Hero */
+.hero { padding: 80px 0 60px; position: relative; }
+.hero-content { text-align: center; max-width: 900px; margin: 0 auto; }
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(20,184,166,0.1);
+    border: 1px solid rgba(20,184,166,0.3);
+    color: var(--accent);
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 24px;
+}
+.hero-badge .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px var(--accent); animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.hero h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+}
+.gradient-text {
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.hero p { font-size: 18px; color: var(--text-muted); max-width: 600px; margin: 0 auto 40px; }
+.hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* Trust bar */
+.trust-bar { margin-top: 80px; padding-top: 40px; border-top: 1px solid var(--border); text-align: center; }
+.trust-bar p { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 2px; }
+.trust-logos { display: flex; justify-content: center; gap: 60px; flex-wrap: wrap; opacity: 0.5; }
+.trust-logos span { font-size: 20px; font-weight: 700; color: var(--text-muted); }
+
+/* Stats */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    padding: 40px 0;
+    margin: 40px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+.stat-num {
+    font-size: 40px;
+    font-weight: 800;
+    background: var(--gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -1px;
+}
+.stat-label { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+
+/* Section */
+.section { padding: 100px 0; }
+.section-head { text-align: center; max-width: 700px; margin: 0 auto 60px; }
+.section-tag { color: var(--accent); font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; }
+.section-head h2 { font-size: clamp(28px, 4vw, 44px); font-weight: 800; letter-spacing: -1px; margin: 12px 0; line-height: 1.1; }
+.section-head p { color: var(--text-muted); font-size: 17px; }
+
+/* Bento */
+.bento { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.bento-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    transition: all 0.3s;
+}
+.bento-item:hover { border-color: var(--accent); transform: translateY(-4px); }
+.bento-item.span-2 { grid-column: span 2; }
+.bento-item .icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(20,184,166,0.1);
+    color: var(--accent);
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+.bento-item h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.3px; }
+.bento-item p { color: var(--text-muted); font-size: 14px; }
+.bento-item.featured { background: var(--gradient); border-color: transparent; color: white; }
+.bento-item.featured h3, .bento-item.featured p { color: white; }
+.bento-item.featured p { opacity: 0.9; }
+.bento-item.featured .icon-box { background: rgba(255,255,255,0.2); color: white; }
+
+/* Pricing */
+.toggle-billing-wrap { text-align: center; }
+.toggle-billing {
+    display: inline-flex;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 4px;
+    margin: 0 auto 40px;
+    gap: 4px;
+}
+.toggle-billing button {
+    padding: 8px 20px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    border-radius: 100px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    font-family: inherit;
+}
+.toggle-billing button.active { background: var(--gradient); color: white; }
+.toggle-billing .save-tag { margin-left: 6px; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 100px; font-size: 11px; }
+
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.pricing-grid.cols-4 { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.price-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    position: relative;
+    transition: all 0.3s;
+}
+.price-card:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-4px); }
+.price-card.popular {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, var(--bg-card) 0%, rgba(20,184,166,0.05) 100%);
+}
+.price-card.popular::before {
+    content: 'PALING DIPILIH';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gradient);
+    color: white;
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+.price-card h3 { font-size: 18px; color: var(--accent); margin-bottom: 8px; font-weight: 700; }
+.price-card .desc { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+.price-amount { display: flex; align-items: baseline; gap: 6px; margin-bottom: 24px; }
+.price-amount .num { font-size: 42px; font-weight: 800; letter-spacing: -1px; }
+.price-amount .per { color: var(--text-muted); font-size: 14px; }
+.price-old { color: var(--text-muted); text-decoration: line-through; font-size: 14px; margin-bottom: 4px; }
+.price-features { margin: 24px 0; }
+.price-features li { padding: 8px 0; color: var(--text); display: flex; gap: 10px; align-items: center; font-size: 14px; }
+.price-features .check {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(20,184,166,0.15);
+    color: var(--accent);
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* Testimonials */
+.test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.test-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    transition: all 0.3s;
+}
+.test-card:hover { border-color: var(--accent); }
+.test-stars { color: #fbbf24; margin-bottom: 16px; }
+.test-text { margin-bottom: 20px; color: var(--text); line-height: 1.6; }
+.test-author { display: flex; align-items: center; gap: 12px; padding-top: 16px; border-top: 1px solid var(--border); }
+.avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--gradient);
+    display: grid;
+    place-items: center;
+    color: white;
+    font-weight: 700;
+}
+.test-author h4 { font-size: 14px; font-weight: 600; }
+.test-author small { color: var(--text-muted); font-size: 12px; }
+
+/* CTA */
+.cta-section { padding: 80px 0; }
+.cta-card {
+    background: var(--gradient);
+    border-radius: 24px;
+    padding: 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.cta-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 50%);
+}
+.cta-card h2 { color: white; font-size: 36px; font-weight: 800; margin-bottom: 12px; position: relative; }
+.cta-card p { color: rgba(255,255,255,0.9); font-size: 17px; margin-bottom: 32px; position: relative; }
+.cta-card .btn { background: white; color: var(--text-dark); position: relative; }
+
+/* Footer */
+.footer { border-top: 1px solid var(--border); padding: 60px 0 30px; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+.footer-col p { color: var(--text-muted); font-size: 14px; margin-top: 16px; max-width: 300px; }
+.footer-col h4 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; color: var(--text-muted); }
+.footer-col ul li { margin-bottom: 10px; }
+.footer-col ul li a { color: var(--text); font-size: 14px; cursor: pointer; }
+.footer-col ul li a:hover { color: var(--accent); }
+.footer-bottom {
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+.social-links { display: flex; gap: 10px; }
+.social-links a {
+    width: 36px;
+    height: 36px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.social-links a:hover { background: var(--accent); border-color: var(--accent); }
+
+/* Auth - Centered Card */
+.auth-wrap {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 40px 20px;
+}
+.auth-card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 36px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+[data-theme="light"] .auth-card { box-shadow: 0 20px 60px rgba(0,0,0,0.08); }
+.auth-card h1 { text-align: center; font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 24px; }
+
+/* Login Tabs */
+.login-tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 24px; }
+.login-tab {
+    padding: 10px 28px;
+    border-radius: 100px;
+    border: none;
+    background: rgba(99,102,241,0.08);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+.login-tab:hover { background: rgba(99,102,241,0.15); }
+.login-tab.active { background: var(--gradient); color: white; box-shadow: 0 4px 12px rgba(20,184,166,0.3); }
+
+/* Google Button */
+.google-btn {
+    width: 100%;
+    padding: 12px 16px;
+    background: white;
+    color: #1f1f1f;
+    border: 1px solid #dadce0;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+.google-btn:hover { background: #f8f9fa; border-color: #aaa; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+.google-btn svg { width: 20px; height: 20px; }
+
+/* Divider */
+.auth-divider { display: flex; align-items: center; margin: 20px 0; color: var(--text-muted); font-size: 13px; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.auth-divider::before { margin-right: 12px; }
+.auth-divider::after { margin-left: 12px; }
+
+.forgot-link { display: block; color: var(--accent); font-size: 13px; font-weight: 600; margin-bottom: 20px; cursor: pointer; }
+
+/* Old split auth (unused) */
+.auth-side {
+    background: var(--gradient);
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+}
+.auth-side::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+    border-radius: 50%;
+}
+.auth-side .brand, .auth-side .quote, .auth-side .auth-foot { position: relative; z-index: 1; color: white; }
+.auth-side .quote h2 { font-size: 32px; line-height: 1.2; margin-bottom: 16px; }
+.auth-side .quote p { opacity: 0.9; font-size: 15px; }
+.auth-side .auth-foot { opacity: 0.7; font-size: 13px; }
+.auth-form-side {
+    background: var(--bg);
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.auth-form-side h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; letter-spacing: -1px; }
+.auth-form-side > p { color: var(--text-muted); margin-bottom: 32px; }
+.auth-form { max-width: 400px; width: 100%; }
+
+/* Form */
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--text-muted); font-weight: 500; }
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(20,184,166,0.15);
+}
+.form-group input:disabled { opacity: 0.6; cursor: not-allowed; }
+.form-footer { margin-top: 24px; text-align: center; color: var(--text-muted); font-size: 14px; }
+.form-footer a { color: var(--accent); font-weight: 600; cursor: pointer; }
+
+.alert { padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 20px; font-size: 14px; }
+.alert-success { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+.alert-error { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+.alert-info { background: rgba(99,102,241,0.1); color: #818cf8; border: 1px solid rgba(99,102,241,0.3); }
+
+/* Page hero */
+.page-hero { padding: 80px 0 40px; text-align: center; }
+.page-hero h1 { font-size: clamp(32px, 5vw, 52px); font-weight: 800; letter-spacing: -1.5px; margin-bottom: 12px; }
+.page-hero p { color: var(--text-muted); font-size: 17px; max-width: 600px; margin: 0 auto; }
+
+/* Domain */
+.domain-box {
+    max-width: 700px;
+    margin: 0 auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 32px;
+    border-radius: var(--radius);
+}
+.domain-form { display: flex; gap: 8px; }
+.domain-form input, .domain-form select {
+    padding: 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 15px;
+    outline: none;
+    font-family: inherit;
+}
+.domain-form input { flex: 1; }
+.domain-form input:focus, .domain-form select:focus { border-color: var(--accent); }
+.domain-result { margin-top: 20px; padding: 16px; border-radius: var(--radius-sm); display: none; }
+.domain-result.show { display: block; }
+.domain-result.available { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+.domain-result.unavailable { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+
+/* Dashboard */
+.dash { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+.dash-side {
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+.dash-side .logo { padding: 0 24px 24px; border-bottom: 1px solid var(--border); }
+.dash-menu { padding: 16px 12px; }
+.dash-menu a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.dash-menu a:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.dash-menu a.active { background: rgba(20,184,166,0.1); color: var(--accent); }
+.dash-menu a .ic { font-size: 16px; }
+
+.dash-main { padding: 24px 32px; }
+.dash-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; gap: 16px; flex-wrap: wrap; }
+.dash-head h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+.dash-head p { color: var(--text-muted); font-size: 14px; }
+.dash-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px 8px 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+}
+
+.dash-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.dash-stat {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+}
+.dash-stat .top { display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px; }
+.dash-stat .ic-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(20,184,166,0.1);
+    color: var(--accent);
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+}
+.dash-stat .ic-wrap.purple { background: rgba(99,102,241,0.1); color: var(--secondary); }
+.dash-stat .ic-wrap.orange { background: rgba(245,158,11,0.1); color: var(--warning); }
+.dash-stat .ic-wrap.red { background: rgba(239,68,68,0.1); color: var(--danger); }
+.dash-stat .change { font-size: 12px; padding: 2px 8px; border-radius: 100px; background: rgba(16,185,129,0.15); color: #34d399; }
+.dash-stat h2 { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+.dash-stat p { color: var(--text-muted); font-size: 13px; }
+
+.dash-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+.dash-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.dash-card-head h3 { font-size: 18px; font-weight: 700; }
+
+table { width: 100%; border-collapse: collapse; }
+table th, table td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
+table th { color: var(--text-muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; background: rgba(255,255,255,0.02); }
+table tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+.status { display: inline-block; padding: 4px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+.status-active { background: rgba(16,185,129,0.15); color: #34d399; }
+.status-pending { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.status-expired { background: rgba(239,68,68,0.15); color: #f87171; }
+
+.empty { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+.empty .ic { font-size: 56px; margin-bottom: 12px; opacity: 0.5; }
+.empty h3 { color: var(--text); margin-bottom: 8px; }
+
+/* Checkout */
+.checkout-wrap { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; padding: 40px 0; }
+.ck-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+}
+.ck-card h2 { font-size: 20px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.sum-item { display: flex; justify-content: space-between; padding: 12px 0; color: var(--text); font-size: 14px; }
+.sum-total { display: flex; justify-content: space-between; padding: 16px 0; font-size: 20px; font-weight: 800; color: var(--accent); border-top: 1px solid var(--border); margin-top: 12px; }
+
+/* Contact */
+.contact-wrap { display: grid; grid-template-columns: 1fr 2fr; gap: 24px; padding: 40px 0; }
+.contact-info-box {
+    background: var(--gradient);
+    border-radius: var(--radius);
+    padding: 32px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+.contact-info-box::before {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    right: -80px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+}
+.contact-info-box h3 { font-size: 22px; margin-bottom: 20px; position: relative; }
+.ci-item { display: flex; gap: 14px; margin-bottom: 20px; position: relative; }
+.ci-item .ic { width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 10px; display: grid; place-items: center; flex-shrink: 0; font-size: 18px; }
+.ci-item h4 { font-size: 14px; margin-bottom: 4px; }
+.ci-item p { opacity: 0.9; font-size: 13px; }
+
+details.faq {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+details.faq summary { font-weight: 600; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+details.faq summary::-webkit-details-marker { display: none; }
+details.faq summary::after { content: '+'; font-size: 24px; color: var(--accent); }
+details.faq[open] summary::after { content: '−'; }
+details.faq p { margin-top: 12px; color: var(--text-muted); font-size: 14px; }
+
+/* Responsive */
+@media (max-width: 968px) {
+    .bento, .pricing-grid, .pricing-grid.cols-4, .test-grid, .stats-row { grid-template-columns: 1fr 1fr; }
+    .bento-item.span-2 { grid-column: span 2; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .dash-stats { grid-template-columns: 1fr 1fr; }
+    .auth-wrap, .checkout-wrap, .contact-wrap { grid-template-columns: 1fr; }
+    .auth-side { display: none; }
+    .nav-menu, .nav-auth { display: none; }
+    .nav-menu.show { display: flex; position: absolute; flex-direction: column; top: 65px; left: 0; right: 0; background: var(--bg-card); padding: 20px; border-bottom: 1px solid var(--border); }
+    .nav-toggle { display: block; }
+    .dash { grid-template-columns: 1fr; }
+    .dash-side { display: none; }
+    .cta-card { padding: 40px 24px; }
+}
+@media (max-width: 600px) {
+    .bento, .pricing-grid, .pricing-grid.cols-4, .test-grid, .stats-row, .footer-grid, .dash-stats { grid-template-columns: 1fr; }
+    .bento-item.span-2 { grid-column: span 1; }
+    .domain-form { flex-direction: column; }
+    .footer-bottom { flex-direction: column; gap: 16px; }
+    .auth-form-side { padding: 40px 24px; }
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="mesh-bg"></div>
+
+<!-- ========== LAYOUT: PUBLIC (Navbar + content + Footer) ========== -->
+<div class="layout" id="layout-public">
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a class="logo" onclick="navigate('home')">
+                <span class="logo-mark">Z</span>
+                <span>Zentra</span>
+            </a>
+            <ul class="nav-menu" id="navMenu">
+                <li><a data-nav="home" onclick="navigate('home')">Beranda</a></li>
+                <li><a data-nav="paket" onclick="navigate('paket')">Paket</a></li>
+                <li><a data-nav="domain" onclick="navigate('domain')">Domain</a></li>
+                <li><a data-nav="kontak" onclick="navigate('kontak')">Kontak</a></li>
+            </ul>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Ubah tema">🌙</button>
+                <div class="nav-auth" id="navAuth"></div>
+            </div>
+            <button class="nav-toggle" onclick="document.getElementById('navMenu').classList.toggle('show')">☰</button>
+        </div>
+    </nav>
+
+    <!-- PAGE: HOME -->
+    <div class="page" id="page-home">
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <span class="hero-badge"><span class="dot"></span>Server baru di Jakarta sudah online</span>
+                    <h1>Infrastruktur web yang <span class="gradient-text">cepat, andal, dan tak terbatas.</span></h1>
+                    <p>Zentra Host menggabungkan NVMe SSD, LiteSpeed Enterprise, dan CDN global untuk performa terbaik website Anda.</p>
+                    <div class="hero-buttons">
+                        <a class="btn btn-primary btn-lg" onclick="navigate('paket')">Mulai Hosting →</a>
+                        <a class="btn btn-ghost btn-lg" href="#home-fitur" onclick="document.getElementById('home-fitur').scrollIntoView({behavior:'smooth'});">Lihat Fitur</a>
+                    </div>
+                    <div class="stats-row">
+                        <div><div class="stat-num">99.99%</div><div class="stat-label">Uptime SLA</div></div>
+                        <div><div class="stat-num">&lt; 200ms</div><div class="stat-label">Response Time</div></div>
+                        <div><div class="stat-num">50K+</div><div class="stat-label">Website Aktif</div></div>
+                        <div><div class="stat-num">24/7</div><div class="stat-label">Support Pro</div></div>
+                    </div>
+                </div>
+                <div class="trust-bar">
+                    <p>Dipercaya oleh ribuan brand & startup di Indonesia</p>
+                    <div class="trust-logos">
+                        <span>BUMI · TECH</span>
+                        <span>NUSA · KARYA</span>
+                        <span>RAYA · DIGITAL</span>
+                        <span>ARTA · LABS</span>
+                        <span>MAJU · GROUP</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="home-fitur">
+            <div class="container">
+                <div class="section-head">
+                    <span class="section-tag">Fitur Unggulan</span>
+                    <h2>Semua yang Anda butuhkan untuk berkembang</h2>
+                    <p>Stack hosting lengkap dengan teknologi terbaru.</p>
+                </div>
+                <div class="bento">
+                    <div class="bento-item span-2 featured">
+                        <div class="icon-box">⚡</div>
+                        <h3>NVMe SSD + LiteSpeed Enterprise</h3>
+                        <p>Loading website hingga 9x lebih cepat dari Apache. Kombinasi storage NVMe terbaru dan web server LiteSpeed menghasilkan performa terbaik di kelasnya.</p>
+                    </div>
+                    <div class="bento-item"><div class="icon-box">🛡️</div><h3>SSL Gratis</h3><p>Sertifikat Let's Encrypt otomatis.</p></div>
+                    <div class="bento-item"><div class="icon-box">🌍</div><h3>CDN Global</h3><p>200+ edge location worldwide.</p></div>
+                    <div class="bento-item"><div class="icon-box">💾</div><h3>Backup Otomatis</h3><p>Snapshot harian tersimpan 30 hari.</p></div>
+                    <div class="bento-item"><div class="icon-box">📧</div><h3>Email Profesional</h3><p>Email unlimited domain sendiri.</p></div>
+                    <div class="bento-item"><div class="icon-box">🔧</div><h3>cPanel</h3><p>Panel terlengkap & mudah.</p></div>
+                    <div class="bento-item"><div class="icon-box">💬</div><h3>Support 24/7</h3><p>Tim teknis siap kapan saja.</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="section-head">
+                    <span class="section-tag">Harga</span>
+                    <h2>Transparan, tanpa biaya tersembunyi</h2>
+                    <p>Pilih paket sesuai kebutuhan. Upgrade kapan saja.</p>
+                </div>
+                <div class="toggle-billing-wrap">
+                    <div class="toggle-billing" id="homePricingToggle">
+                        <button class="active" data-period="monthly">Bulanan</button>
+                        <button data-period="yearly">Tahunan <span class="save-tag">−20%</span></button>
+                    </div>
+                </div>
+                <div class="pricing-grid" id="homePricingGrid"></div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="section-head">
+                    <span class="section-tag">Testimoni</span>
+                    <h2>Apa kata pelanggan kami</h2>
+                </div>
+                <div class="test-grid">
+                    <div class="test-card">
+                        <div class="test-stars">★★★★★</div>
+                        <p class="test-text">"Migrasi dari hosting lama ke Zentra cuma butuh 1 jam, dan website saya jadi 3x lebih cepat."</p>
+                        <div class="test-author"><div class="avatar">R</div><div><h4>Rizki Pratama</h4><small>Founder · TokoRaya.id</small></div></div>
+                    </div>
+                    <div class="test-card">
+                        <div class="test-stars">★★★★★</div>
+                        <p class="test-text">"Sudah 3 tahun pakai Zentra. Uptime-nya benar-benar bisa diandalkan."</p>
+                        <div class="test-author"><div class="avatar">D</div><div><h4>Dian Permata</h4><small>CTO · Bumi Studio</small></div></div>
+                    </div>
+                    <div class="test-card">
+                        <div class="test-stars">★★★★★</div>
+                        <p class="test-text">"Zentra delivered dengan harga yang masih masuk akal untuk blog saya."</p>
+                        <div class="test-author"><div class="avatar">A</div><div><h4>Anita Wirawan</h4><small>Travel Blogger</small></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="container">
+                <div class="cta-card">
+                    <h2>Siap memulai?</h2>
+                    <p>Coba gratis 7 hari. Tidak perlu kartu kredit.</p>
+                    <a class="btn btn-lg" onclick="navigate('register')">Daftar Sekarang →</a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- PAGE: PAKET -->
+    <div class="page" id="page-paket">
+        <section class="page-hero">
+            <div class="container">
+                <span class="hero-badge"><span class="dot"></span>Promo akhir tahun — Hemat hingga 60%</span>
+                <h1>Paket hosting untuk setiap skala</h1>
+                <p>Mulai dari blog personal hingga e-commerce skala enterprise.</p>
+            </div>
+        </section>
+        <section class="section" style="padding-top: 40px;">
+            <div class="container">
+                <div class="toggle-billing-wrap" style="margin-bottom: 40px;">
+                    <div class="toggle-billing" id="paketToggle">
+                        <button class="active" data-type="shared">Shared</button>
+                        <button data-type="cloud">Cloud</button>
+                        <button data-type="vps">VPS</button>
+                    </div>
+                </div>
+                <div class="pricing-grid cols-4" id="paketGrid"></div>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container">
+                <div class="section-head">
+                    <span class="section-tag">Perbandingan</span>
+                    <h2>Fitur lengkap semua paket</h2>
+                </div>
+                <div class="dash-card" style="overflow-x: auto;">
+                    <table>
+                        <thead><tr><th>Fitur</th><th>Starter</th><th>Business</th><th>Pro</th><th>Enterprise</th></tr></thead>
+                        <tbody>
+                            <tr><td>Storage NVMe</td><td>5 GB</td><td>30 GB</td><td>100 GB</td><td>500 GB</td></tr>
+                            <tr><td>Bandwidth</td><td>20 GB</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td></tr>
+                            <tr><td>Website</td><td>1</td><td>10</td><td>Unlimited</td><td>Unlimited</td></tr>
+                            <tr><td>Database</td><td>1</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td></tr>
+                            <tr><td>Email Account</td><td>5</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td></tr>
+                            <tr><td>SSL + CDN</td><td>SSL Only</td><td>SSL + CDN</td><td>SSL + CDN + WAF</td><td>Full Stack</td></tr>
+                            <tr><td>Backup</td><td>Manual</td><td>Daily</td><td>Hourly</td><td>Real-time</td></tr>
+                            <tr><td>Support</td><td>Email</td><td>Chat 24/7</td><td>Priority</td><td>Dedicated Engineer</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- PAGE: DOMAIN -->
+    <div class="page" id="page-domain">
+        <section class="page-hero">
+            <div class="container">
+                <span class="hero-badge"><span class="dot"></span>Domain ekstensi terlengkap</span>
+                <h1>Cari domain <span class="gradient-text">impianmu</span></h1>
+                <p>Daftarkan nama domain unik untuk websitemu. Mulai dari Rp 50.000/tahun.</p>
+            </div>
+        </section>
+        <section class="section" style="padding-top:20px;">
+            <div class="container">
+                <div class="domain-box">
+                    <form class="domain-form" id="domainSearchForm">
+                        <input type="text" id="domainInput" placeholder="contoh: bisnisku" required>
+                        <select id="domainExtension">
+                            <option value=".com">.com</option>
+                            <option value=".id">.id</option>
+                            <option value=".co.id">.co.id</option>
+                            <option value=".net">.net</option>
+                            <option value=".org">.org</option>
+                            <option value=".online">.online</option>
+                            <option value=".my.id">.my.id</option>
+                            <option value=".biz.id">.biz.id</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">Cek →</button>
+                    </form>
+                    <div id="domainResult" class="domain-result"></div>
+                </div>
+            </div>
+        </section>
+        <section class="section">
+            <div class="container">
+                <div class="section-head">
+                    <span class="section-tag">Daftar Harga</span>
+                    <h2>Harga semua ekstensi</h2>
+                </div>
+                <div class="bento" id="domainPriceGrid"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- PAGE: KONTAK -->
+    <div class="page" id="page-kontak">
+        <section class="page-hero">
+            <div class="container">
+                <h1>Hubungi <span class="gradient-text">tim kami</span></h1>
+                <p>Tim support tersedia 24/7. Kami siap membantu Anda kapan saja.</p>
+            </div>
+        </section>
+        <div class="container">
+            <div class="contact-wrap">
+                <div class="contact-info-box">
+                    <h3>Info Kontak</h3>
+                    <div class="ci-item"><div class="ic">📧</div><div><h4>Email</h4><p>support@zentra.id</p><p>sales@zentra.id</p></div></div>
+                    <div class="ci-item"><div class="ic">📱</div><div><h4>Telepon / WhatsApp</h4><p>+62 812-3456-7890</p></div></div>
+                    <div class="ci-item"><div class="ic">📍</div><div><h4>Kantor Pusat</h4><p>Jl. Sudirman No. 123<br>Jakarta Pusat 10220<br>Indonesia</p></div></div>
+                    <div class="ci-item"><div class="ic">🕐</div><div><h4>Jam Operasional</h4><p>Support: 24/7<br>Sales: Senin–Jumat 09.00–17.00</p></div></div>
+                </div>
+                <div class="ck-card">
+                    <h2>📨 Kirim Pesan</h2>
+                    <div id="contactAlert"></div>
+                    <form id="contactForm">
+                        <div class="form-group"><label>Nama Lengkap</label><input type="text" id="contactName" required></div>
+                        <div class="form-group"><label>Email</label><input type="email" id="contactEmail" required></div>
+                        <div class="form-group">
+                            <label>Subjek</label>
+                            <select id="contactSubject" required>
+                                <option value="">-- Pilih subjek --</option>
+                                <option>Pertanyaan Umum</option>
+                                <option>Bantuan Teknis</option>
+                                <option>Informasi Paket</option>
+                                <option>Komplain</option>
+                                <option>Kerja Sama</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Pesan</label><textarea id="contactMessage" rows="5" placeholder="Tulis pesan Anda di sini..." required></textarea></div>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">Kirim Pesan →</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <section class="section">
+            <div class="container">
+                <div class="section-head">
+                    <span class="section-tag">FAQ</span>
+                    <h2>Pertanyaan yang sering ditanyakan</h2>
+                </div>
+                <div style="max-width:760px;margin:0 auto;">
+                    <details class="faq"><summary>Bagaimana cara mendaftar di Zentra?</summary><p>Klik "Daftar" di pojok kanan atas, isi formulir, dan akun langsung aktif tanpa verifikasi manual.</p></details>
+                    <details class="faq"><summary>Berapa lama proses aktivasi hosting?</summary><p>Otomatis setelah pembayaran terkonfirmasi, biasanya kurang dari 60 detik.</p></details>
+                    <details class="faq"><summary>Apakah ada garansi uang kembali?</summary><p>Ya, garansi 30 hari untuk semua paket shared hosting tanpa pertanyaan.</p></details>
+                    <details class="faq"><summary>Apakah bisa upgrade paket di kemudian hari?</summary><p>Tentu! Upgrade kapan saja melalui dashboard, bayar selisihnya saja.</p></details>
+                    <details class="faq"><summary>Metode pembayaran apa saja yang tersedia?</summary><p>Transfer bank (BCA, Mandiri, BNI, BRI), e-wallet (GoPay, OVO, DANA), QRIS, dan kartu kredit.</p></details>
+                    <details class="faq"><summary>Apakah Zentra menyediakan migrasi dari hosting lain?</summary><p>Ya, migrasi gratis untuk semua pelanggan baru.</p></details>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- PAGE: CHECKOUT -->
+    <div class="page" id="page-checkout">
+        <section class="page-hero">
+            <div class="container">
+                <h1>Checkout</h1>
+                <p>Selesaikan pembayaran untuk mengaktifkan layanan</p>
+            </div>
+        </section>
+        <div class="container">
+            <div id="checkoutAlert"></div>
+            <div class="checkout-wrap">
+                <div class="ck-card">
+                    <h2>📋 Informasi Pemesan</h2>
+                    <form id="checkoutForm">
+                        <div class="form-group"><label>Nama Lengkap</label><input type="text" id="ckFullname" required></div>
+                        <div class="form-group"><label>Email</label><input type="email" id="ckEmail" required></div>
+                        <div class="form-group"><label>Nomor HP</label><input type="tel" id="ckPhone" required></div>
+                        <div class="form-group"><label>Alamat Lengkap</label><textarea id="ckAddress" rows="3" required></textarea></div>
+                        <h2 style="margin-top:32px;">💳 Pembayaran</h2>
+                        <div class="form-group">
+                            <label>Metode Pembayaran</label>
+                            <select id="ckPayment" required>
+                                <option value="">-- Pilih metode --</option>
+                                <option value="bca">Transfer BCA</option>
+                                <option value="mandiri">Transfer Mandiri</option>
+                                <option value="bni">Transfer BNI</option>
+                                <option value="bri">Transfer BRI</option>
+                                <option value="gopay">GoPay</option>
+                                <option value="ovo">OVO</option>
+                                <option value="dana">DANA</option>
+                                <option value="qris">QRIS</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top:20px;">Bayar Sekarang →</button>
+                    </form>
+                </div>
+                <div class="ck-card" style="height:fit-content;position:sticky;top:90px;">
+                    <h2>🛒 Ringkasan</h2>
+                    <div id="orderSummary"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <a class="logo" onclick="navigate('home')"><span class="logo-mark">Z</span><span>Zentra</span></a>
+                    <p>Infrastruktur web generasi baru untuk Indonesia. Cepat, aman, dan didukung tim engineer lokal.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Produk</h4>
+                    <ul>
+                        <li><a onclick="navigate('paket')">Shared Hosting</a></li>
+                        <li><a onclick="navigate('paket')">Cloud Hosting</a></li>
+                        <li><a onclick="navigate('paket')">VPS Server</a></li>
+                        <li><a onclick="navigate('domain')">Domain</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Perusahaan</h4>
+                    <ul>
+                        <li><a>Tentang</a></li>
+                        <li><a>Blog</a></li>
+                        <li><a>Karier</a></li>
+                        <li><a onclick="navigate('kontak')">Kontak</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Bantuan</h4>
+                    <ul>
+                        <li><a>Dokumentasi</a></li>
+                        <li><a>Status Server</a></li>
+                        <li><a>Pusat Bantuan</a></li>
+                        <li><a>API</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 Zentra Host. Built in Indonesia 🇮🇩</p>
+                <div class="social-links"><a>𝕏</a><a>in</a><a>ig</a><a>gh</a></div>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<!-- ========== LAYOUT: AUTH (Login / Register) ========== -->
+<div class="layout" id="layout-auth">
+    <!-- PAGE: LOGIN -->
+    <div class="page" id="page-login">
+        <div class="auth-wrap">
+            <div class="auth-card">
+                <div style="text-align:center;margin-bottom:24px;">
+                    <a class="logo" style="justify-content:center;" onclick="navigate('home')">
+                        <span class="logo-mark">Z</span>
+                        <span>Zentra</span>
+                    </a>
+                </div>
+                <h1>Login</h1>
+
+                <div class="login-tabs">
+                    <button class="login-tab active" data-loginmode="zentra" onclick="switchLoginMode('zentra', this)">Zentra</button>
+                    <button class="login-tab" data-loginmode="admin" onclick="switchLoginMode('admin', this)">Admin</button>
+                </div>
+
+                <button type="button" class="google-btn" onclick="loginWithGoogle()">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09 0-.72.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Lanjutkan dengan Google
+                </button>
+
+                <div class="auth-divider">atau</div>
+
+                <div id="loginAlert"></div>
+
+                <form id="loginForm">
+                    <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="nama@email.com" required></div>
+                    <div class="form-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••" required></div>
+                    <a class="forgot-link" onclick="alert('Fitur lupa password — silakan hubungi admin di support@zentra.id')">Lupa password?</a>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">Login</button>
+                </form>
+
+                <div class="form-footer">
+                    <p>Belum punya akun? <a onclick="navigate('register')">Daftar</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE: REGISTER -->
+    <div class="page" id="page-register">
+        <div class="auth-wrap">
+            <div class="auth-card">
+                <div style="text-align:center;margin-bottom:24px;">
+                    <a class="logo" style="justify-content:center;" onclick="navigate('home')">
+                        <span class="logo-mark">Z</span>
+                        <span>Zentra</span>
+                    </a>
+                </div>
+                <h1>Daftar</h1>
+
+                <button type="button" class="google-btn" onclick="loginWithGoogle()">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09 0-.72.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Daftar dengan Google
+                </button>
+
+                <div class="auth-divider">atau</div>
+
+                <div id="registerAlert"></div>
+
+                <form id="registerForm">
+                    <div class="form-group"><label>Nama Lengkap</label><input type="text" id="regFullname" placeholder="Nama lengkap Anda" required></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="nama@email.com" required></div>
+                    <div class="form-group"><label>Nomor HP</label><input type="tel" id="regPhone" placeholder="08xxxxxxxxxx" required></div>
+                    <div class="form-group"><label>Password</label><input type="password" id="regPassword" placeholder="Min. 6 karakter" minlength="6" required></div>
+                    <div class="form-group"><label>Konfirmasi Password</label><input type="password" id="regConfirm" placeholder="Ulangi password" minlength="6" required></div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">Buat Akun</button>
+                </form>
+
+                <div class="form-footer">
+                    <p>Sudah punya akun? <a onclick="navigate('login')">Masuk</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== LAYOUT: DASHBOARD ========== -->
+<div class="layout" id="layout-dashboard">
+    <div class="dash">
+        <aside class="dash-side">
+            <a class="logo" onclick="navigate('home')"><span class="logo-mark">Z</span><span>Zentra</span></a>
+            <nav class="dash-menu">
+                <a class="active" data-section="overview" onclick="switchDashSection('overview', this)"><span class="ic">⚡</span> Overview</a>
+                <a data-section="hosting" onclick="switchDashSection('hosting', this)"><span class="ic">🌐</span> Hosting</a>
+                <a data-section="domain" onclick="switchDashSection('domain', this)"><span class="ic">🔗</span> Domain</a>
+                <a data-section="invoice" onclick="switchDashSection('invoice', this)"><span class="ic">📄</span> Invoice</a>
+                <a data-section="profile" onclick="switchDashSection('profile', this)"><span class="ic">👤</span> Profil</a>
+                <a onclick="navigate('paket')"><span class="ic">🛍️</span> Beli Paket</a>
+                <a onclick="logout()"><span class="ic">↪</span> Keluar</a>
+            </nav>
+        </aside>
+        <main class="dash-main">
+            <div class="dash-head">
+                <div>
+                    <h1 id="dashTitle">Selamat datang!</h1>
+                    <p id="dashSubtitle">Ini ringkasan akun Anda hari ini.</p>
+                </div>
+                <div style="display:flex;gap:12px;align-items:center;">
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Ubah tema">🌙</button>
+                    <div class="dash-user">
+                        <div class="avatar" id="dashAvatar">U</div>
+                        <div>
+                            <h4 id="dashUserName" style="font-size:13px;font-weight:600;">User</h4>
+                            <small id="dashUserEmail" style="color:var(--text-muted);font-size:11px;">user@email.com</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <section id="dash-overview" class="dash-section">
+                <div class="dash-stats">
+                    <div class="dash-stat"><div class="top"><div class="ic-wrap">🌐</div></div><h2 id="statHosting">0</h2><p>Hosting Aktif</p></div>
+                    <div class="dash-stat"><div class="top"><div class="ic-wrap purple">🔗</div></div><h2 id="statDomain">0</h2><p>Domain Terdaftar</p></div>
+                    <div class="dash-stat"><div class="top"><div class="ic-wrap orange">📄</div></div><h2 id="statInvoice">0</h2><p>Total Invoice</p></div>
+                    <div class="dash-stat"><div class="top"><div class="ic-wrap red">💰</div></div><h2 id="statTotal" style="font-size:24px;">Rp 0</h2><p>Total Pengeluaran</p></div>
+                </div>
+                <div class="dash-card">
+                    <div class="dash-card-head"><h3>Layanan Terbaru</h3><a class="btn btn-primary" onclick="navigate('paket')">+ Beli Paket</a></div>
+                    <div id="recentServices"></div>
+                </div>
+            </section>
+
+            <section id="dash-hosting" class="dash-section" style="display:none;">
+                <div class="dash-card">
+                    <div class="dash-card-head"><h3>Hosting Saya</h3><a class="btn btn-primary" onclick="navigate('paket')">+ Hosting Baru</a></div>
+                    <div id="hostingList"></div>
+                </div>
+            </section>
+
+            <section id="dash-domain" class="dash-section" style="display:none;">
+                <div class="dash-card">
+                    <div class="dash-card-head"><h3>Domain Saya</h3><a class="btn btn-primary" onclick="navigate('domain')">+ Domain Baru</a></div>
+                    <div id="domainList"></div>
+                </div>
+            </section>
+
+            <section id="dash-invoice" class="dash-section" style="display:none;">
+                <div class="dash-card">
+                    <div class="dash-card-head"><h3>Riwayat Invoice</h3></div>
+                    <div id="invoiceList"></div>
+                </div>
+            </section>
+
+            <section id="dash-profile" class="dash-section" style="display:none;">
+                <div class="dash-card">
+                    <div class="dash-card-head"><h3>Informasi Profil</h3></div>
+                    <div id="profileBox"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<script>
+/* ============ ZENTRA HOST - ALL IN ONE SCRIPT (SUPABASE EDITION) ============ */
+
+// === Supabase Client ===
+const SUPABASE_URL = 'https://nkzfgcdwyckzgxcdvumu.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_AfrAQS2tzjBx6ac7rbLj1Q_H8vv49TD';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// In-memory cache untuk session user (di-refresh oleh refreshSession + onAuthStateChange)
+let currentUser = null;
+let currentProfile = null;
+
+// === Storage Keys (hanya untuk theme) ===
+const KEYS = {
+    theme: 'zentra_theme'
+};
+
+// === Theme Toggle ===
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem(KEYS.theme, theme);
+    const icon = theme === 'light' ? '☀️' : '🌙';
+    document.querySelectorAll('.theme-toggle').forEach(b => b.textContent = icon);
+}
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+// Init theme ASAP (avoid flash)
+applyTheme(localStorage.getItem(KEYS.theme) || 'dark');
+
+// === Error Translator (English -> Indonesian) ===
+function translateError(error) {
+    if (!error) return 'Terjadi kesalahan tidak diketahui';
+    const msg = error.message || String(error);
+    if (/Invalid login credentials/i.test(msg)) return 'Email atau password salah';
+    if (/User already registered|already.*registered/i.test(msg)) return 'Email sudah terdaftar';
+    if (/Password should be at least 6 characters/i.test(msg)) return 'Password minimal 6 karakter';
+    if (/Email not confirmed/i.test(msg)) return 'Email belum diverifikasi';
+    return 'Terjadi kesalahan: ' + msg;
+}
+
+// === Bootstrap Admin (fire-and-forget di init) ===
+async function ensureAdminBootstrap() {
+    try {
+        const { error } = await sb.auth.signUp({
+            email: 'admin@zentra.id',
+            password: 'admin123',
+            options: { data: { fullname: 'Administrator', phone: '081234567890', role: 'admin' } }
+        });
+        if (error) {
+            const m = error.message || '';
+            if (/already registered|already.*registered|already been registered/i.test(m) || error.status === 422) {
+                // sudah ada, abaikan
+                return;
+            }
+            // error lain → diam saja (tidak ganggu UX user normal)
+            console.warn('[ensureAdminBootstrap]', m);
+        }
+    } catch (e) {
+        console.warn('[ensureAdminBootstrap exception]', e);
+    }
+}
+
+// === Refresh session: ambil session + profile, isi cache ===
+async function refreshSession() {
+    try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session || !session.user) {
+            currentUser = null;
+            currentProfile = null;
+            return null;
+        }
+        const u = session.user;
+        // Ambil profile dari tabel profiles
+        const { data: profile, error: pErr } = await sb
+            .from('profiles')
+            .select('*')
+            .eq('id', u.id)
+            .single();
+
+        if (pErr || !profile) {
+            // fallback: gunakan metadata user, profile null
+            currentProfile = null;
+            currentUser = {
+                id: u.id,
+                email: u.email,
+                fullname: (u.user_metadata && u.user_metadata.fullname) || u.email.split('@')[0],
+                phone: (u.user_metadata && u.user_metadata.phone) || '',
+                role: (u.user_metadata && u.user_metadata.role) || 'customer',
+                createdAt: u.created_at
+            };
+        } else {
+            currentProfile = profile;
+            currentUser = {
+                id: u.id,
+                email: u.email,
+                fullname: profile.fullname || (u.user_metadata && u.user_metadata.fullname) || u.email.split('@')[0],
+                phone: profile.phone || '',
+                role: profile.role || 'customer',
+                createdAt: profile.created_at || u.created_at
+            };
+        }
+        return currentUser;
+    } catch (e) {
+        console.warn('[refreshSession]', e);
+        currentUser = null;
+        currentProfile = null;
+        return null;
+    }
+}
+
+// === Utils ===
+const fmtDate = d => new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+const fmtRp = n => 'Rp ' + Number(n).toLocaleString('id-ID');
+function calcExpiry(d, months = 1) { const x = new Date(d); x.setMonth(x.getMonth() + months); return x; }
+function getStatus(d, m) { return new Date() > calcExpiry(d, m || 1) ? { l: 'Expired', c: 'expired' } : { l: 'Aktif', c: 'active' }; }
+
+// getUser: sinkron, baca dari cache modul (cache diisi oleh refreshSession)
+function getUser() { return currentUser; }
+
+// getOrders: async, ambil dari Supabase
+async function getOrders() {
+    if (!currentUser) return [];
+    const { data, error } = await sb
+        .from('orders')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false });
+    if (error) {
+        console.warn('[getOrders]', error);
+        return [];
+    }
+    return data || [];
+}
+
+function showAlert(elId, msg, type = 'error') {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+    setTimeout(() => { el.innerHTML = ''; }, 5000);
+}
+
+// === Layout & Route definitions ===
+const ROUTES = {
+    home:      { layout: 'public', requireAuth: false },
+    paket:     { layout: 'public', requireAuth: false },
+    domain:    { layout: 'public', requireAuth: false },
+    kontak:    { layout: 'public', requireAuth: false },
+    checkout:  { layout: 'public', requireAuth: false },
+    login:     { layout: 'auth',   requireAuth: false },
+    register:  { layout: 'auth',   requireAuth: false },
+    dashboard: { layout: 'dashboard', requireAuth: true }
+};
+
+let pendingOrder = null;
+
+// === Navigation ===
+function navigate(page, params) {
+    const route = ROUTES[page];
+    if (!route) { page = 'home'; }
+    if (params) pendingOrder = params;
+    window.location.hash = page;
+    renderPage(page).catch(err => console.warn('[renderPage]', err));
+}
+
+async function renderPage(page) {
+    const route = ROUTES[page] || ROUTES.home;
+
+    // Auth-gate via Supabase session
+    if (route.requireAuth) {
+        const { data: { session } } = await sb.auth.getSession();
+        if (!session) {
+            showAlert('loginAlert', 'Silakan login terlebih dahulu', 'info');
+            page = 'login';
+        }
+    }
+
+    const finalRoute = ROUTES[page] || ROUTES.home;
+    // Hide all layouts
+    document.querySelectorAll('.layout').forEach(l => l.classList.remove('active'));
+    document.getElementById('layout-' + finalRoute.layout).classList.add('active');
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const pageEl = document.getElementById('page-' + page);
+    if (pageEl) pageEl.classList.add('active');
+
+    // Update nav active state
+    document.querySelectorAll('[data-nav]').forEach(a => {
+        a.classList.toggle('active', a.dataset.nav === page);
+    });
+
+    // Scroll to top
+    window.scrollTo(0, 0);
+
+    // Page-specific renders
+    if (page === 'home') { renderHomePricing(); }
+    if (page === 'paket') { renderPaket('shared'); }
+    if (page === 'domain') { renderDomainPrices(); }
+    if (page === 'checkout') { renderCheckout(); }
+    if (page === 'dashboard') { await renderDashboard(); }
+
+    updateNavbarAuth();
+    const navMenuEl = document.getElementById('navMenu');
+    if (navMenuEl) navMenuEl.classList.remove('show');
+}
+
+window.addEventListener('hashchange', () => {
+    const page = window.location.hash.replace('#', '') || 'home';
+    renderPage(page).catch(err => console.warn('[hashchange renderPage]', err));
+});
+
+// === Update navbar based on login ===
+function updateNavbarAuth() {
+    const navAuth = document.getElementById('navAuth');
+    if (!navAuth) return;
+    const user = getUser();
+    if (user) {
+        navAuth.innerHTML = `
+            <a class="btn btn-ghost" onclick="navigate('dashboard')">Dashboard</a>
+            <button class="btn btn-primary" onclick="logout()">Keluar</button>
+        `;
+    } else {
+        navAuth.innerHTML = `
+            <a class="btn btn-ghost" onclick="navigate('login')">Masuk</a>
+            <a class="btn btn-primary" onclick="navigate('register')">Mulai Gratis →</a>
+        `;
+    }
+}
+
+async function logout() {
+    if (!confirm('Yakin ingin keluar?')) return;
+    try {
+        await sb.auth.signOut();
+    } catch (e) {
+        console.warn('[logout]', e);
+    }
+    currentUser = null;
+    currentProfile = null;
+    navigate('home');
+}
+
+// === HOME: Pricing ===
+const HOME_PRICING = [
+    { name: 'Starter', desc: 'Untuk personal & landing page', monthly: 19000, yearly: 15000, oldMonthly: 50000, features: ['1 Website', '5 GB NVMe SSD', '20 GB Bandwidth', '5 Email Account', 'SSL Gratis', '1 Database'] },
+    { name: 'Business', desc: 'Pilihan ideal untuk bisnis kecil-menengah', monthly: 49000, yearly: 39000, oldMonthly: 120000, popular: true, features: ['10 Website', '30 GB NVMe SSD', 'Bandwidth Unlimited', 'Email Unlimited', 'SSL + CDN', 'Database Unlimited', 'Daily Backup', 'Priority Support'] },
+    { name: 'Pro', desc: 'Untuk traffic tinggi & e-commerce', monthly: 99000, yearly: 79000, oldMonthly: 250000, features: ['Website Unlimited', '100 GB NVMe SSD', 'Bandwidth Unlimited', 'Email Unlimited', 'SSL + CDN + WAF', 'Dedicated Resource', 'Hourly Backup', 'Engineer 24/7'] }
+];
+let homeBilling = 'monthly';
+
+function renderHomePricing() {
+    const grid = document.getElementById('homePricingGrid');
+    if (!grid) return;
+    grid.innerHTML = HOME_PRICING.map(p => {
+        const price = p[homeBilling];
+        return `
+            <div class="price-card ${p.popular ? 'popular' : ''}">
+                <h3>${p.name}</h3>
+                <p class="desc">${p.desc}</p>
+                ${homeBilling === 'monthly' && p.oldMonthly ? `<div class="price-old">Rp ${p.oldMonthly.toLocaleString('id-ID')}</div>` : ''}
+                <div class="price-amount"><span class="num">Rp ${price.toLocaleString('id-ID')}</span><span class="per">/bulan</span></div>
+                <ul class="price-features">${p.features.map(f => `<li><span class="check">✓</span> ${f}</li>`).join('')}</ul>
+                <a class="btn ${p.popular ? 'btn-primary' : 'btn-ghost'} btn-block" onclick='buyPaket({type:"shared",name:"${p.name}",price:${price}})'>Pilih ${p.name}</a>
+            </div>`;
+    }).join('');
+}
+
+document.getElementById('homePricingToggle').addEventListener('click', (e) => {
+    if (e.target.tagName !== 'BUTTON') return;
+    document.querySelectorAll('#homePricingToggle button').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    homeBilling = e.target.dataset.period;
+    renderHomePricing();
+});
+
+// === PAKET ===
+const PAKET = {
+    shared: [
+        { name: 'Starter', desc: 'Personal & landing', price: 19000, oldPrice: 50000, features: ['1 Website', '5 GB NVMe', '20 GB Bandwidth', '5 Email', 'SSL Gratis'] },
+        { name: 'Business', desc: 'UKM & toko online', price: 49000, oldPrice: 120000, popular: true, features: ['10 Website', '30 GB NVMe', 'Unlimited BW', 'Email Unlimited', 'SSL + CDN', 'Daily Backup'] },
+        { name: 'Pro', desc: 'High traffic site', price: 99000, oldPrice: 250000, features: ['Unlimited Site', '100 GB NVMe', 'Unlimited BW', 'Email Unlimited', 'SSL + CDN + WAF', 'Hourly Backup'] },
+        { name: 'Enterprise', desc: 'Skala enterprise', price: 199000, oldPrice: 500000, features: ['Unlimited Site', '500 GB NVMe', 'Unlimited BW', 'Email Unlimited', 'Full Security', 'Real-time Backup', 'Dedicated Engineer'] }
+    ],
+    cloud: [
+        { name: 'Cloud S', desc: 'Auto-scale ringan', price: 75000, oldPrice: 200000, features: ['2 vCPU', '2 GB RAM', '40 GB NVMe', '1 TB BW', 'Auto Scale'] },
+        { name: 'Cloud M', desc: 'Aplikasi mid-scale', price: 150000, oldPrice: 400000, popular: true, features: ['4 vCPU', '4 GB RAM', '80 GB NVMe', '2 TB BW', 'Load Balancer'] },
+        { name: 'Cloud L', desc: 'Production-grade', price: 280000, oldPrice: 700000, features: ['6 vCPU', '8 GB RAM', '160 GB NVMe', '4 TB BW', 'CDN + LB'] },
+        { name: 'Cloud XL', desc: 'Mission-critical', price: 500000, oldPrice: 1200000, features: ['8 vCPU', '16 GB RAM', '320 GB NVMe', 'Unlimited BW', 'Full Managed'] }
+    ],
+    vps: [
+        { name: 'VPS Lite', desc: 'Dev & staging', price: 99000, oldPrice: 250000, features: ['1 vCPU', '2 GB RAM', '40 GB SSD', '1 IPv4', 'Root Access'] },
+        { name: 'VPS Standard', desc: 'Small production', price: 199000, oldPrice: 500000, popular: true, features: ['2 vCPU', '4 GB RAM', '80 GB SSD', '1 IPv4', 'Snapshot'] },
+        { name: 'VPS Pro', desc: 'Production app', price: 399000, oldPrice: 900000, features: ['4 vCPU', '8 GB RAM', '160 GB SSD', '2 IPv4', 'Backup + Snapshot'] },
+        { name: 'VPS Ultimate', desc: 'Heavy workload', price: 699000, oldPrice: 1500000, features: ['8 vCPU', '16 GB RAM', '320 GB SSD', '4 IPv4', 'Full Management'] }
+    ]
+};
+function renderPaket(type) {
+    const grid = document.getElementById('paketGrid');
+    if (!grid) return;
+    grid.innerHTML = PAKET[type].map(p => `
+        <div class="price-card ${p.popular ? 'popular' : ''}">
+            <h3>${p.name}</h3>
+            <p class="desc">${p.desc}</p>
+            <div class="price-old">Rp ${p.oldPrice.toLocaleString('id-ID')}</div>
+            <div class="price-amount"><span class="num">Rp ${p.price.toLocaleString('id-ID')}</span><span class="per">/bln</span></div>
+            <ul class="price-features">${p.features.map(f => `<li><span class="check">✓</span> ${f}</li>`).join('')}</ul>
+            <a class="btn ${p.popular ? 'btn-primary' : 'btn-ghost'} btn-block" onclick='buyPaket({type:"${type}",name:"${p.name}",price:${p.price}})'>Pilih Paket →</a>
+        </div>
+    `).join('');
+}
+document.getElementById('paketToggle').addEventListener('click', (e) => {
+    if (e.target.tagName !== 'BUTTON') return;
+    document.querySelectorAll('#paketToggle button').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    renderPaket(e.target.dataset.type);
+});
+
+function buyPaket(data) {
+    pendingOrder = data;
+    navigate('checkout');
+}
+
+// === DOMAIN ===
+const DOMAIN_PRICES_LIST = [
+    { ext: '.com', price: 120000, popular: true, desc: 'Domain paling populer di dunia' },
+    { ext: '.id', price: 150000, popular: true, desc: 'Domain resmi Indonesia' },
+    { ext: '.co.id', price: 250000, desc: 'Untuk perusahaan/bisnis Indonesia' },
+    { ext: '.net', price: 130000, desc: 'Cocok untuk situs teknologi' },
+    { ext: '.org', price: 140000, desc: 'Untuk organisasi non-profit' },
+    { ext: '.online', price: 80000, desc: 'Modern untuk bisnis online' },
+    { ext: '.my.id', price: 50000, desc: 'Murah, cocok untuk personal' },
+    { ext: '.biz.id', price: 75000, desc: 'Untuk bisnis kecil' }
+];
+const DOMAIN_PRICES_MAP = Object.fromEntries(DOMAIN_PRICES_LIST.map(d => [d.ext, d.price]));
+
+function renderDomainPrices() {
+    const grid = document.getElementById('domainPriceGrid');
+    if (!grid) return;
+    grid.innerHTML = DOMAIN_PRICES_LIST.map(d => `
+        <div class="bento-item">
+            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px;">
+                <h3 style="color:var(--accent);font-size:32px;letter-spacing:-1px;">${d.ext}</h3>
+                ${d.popular ? '<span class="status status-active">POPULER</span>' : ''}
+            </div>
+            <p style="margin-bottom:20px;">${d.desc}</p>
+            <div style="font-size:24px;font-weight:800;">Rp ${d.price.toLocaleString('id-ID')}<small style="font-size:13px;color:var(--text-muted);font-weight:400;">/tahun</small></div>
+        </div>
+    `).join('');
+}
+
+document.getElementById('domainSearchForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('domainInput').value.toLowerCase().trim();
+    const ext = document.getElementById('domainExtension').value;
+    const result = document.getElementById('domainResult');
+    if (!name) return;
+    const available = Math.random() > 0.3;
+    const price = DOMAIN_PRICES_MAP[ext] || 100000;
+    result.className = 'domain-result show';
+    if (available) {
+        result.classList.add('available');
+        result.innerHTML = `
+            <strong>✓ Domain ${name}${ext} tersedia</strong><br>
+            Harga: Rp ${price.toLocaleString('id-ID')}/tahun
+            <div style="margin-top:14px;">
+                <a class="btn btn-primary" onclick='buyPaket({type:"domain",name:"${name}${ext}",price:${price}})'>Beli Domain →</a>
+            </div>`;
+    } else {
+        result.classList.add('unavailable');
+        result.innerHTML = `<strong>✗ Maaf, ${name}${ext} sudah terdaftar</strong><br>Coba kombinasi nama atau ekstensi lain.`;
+    }
+});
+
+// === KONTAK ===
+document.getElementById('contactForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('contactName').value.trim();
+    const email = document.getElementById('contactEmail').value.trim();
+    const subject = document.getElementById('contactSubject').value;
+    const message = document.getElementById('contactMessage').value.trim();
+
+    const { error } = await sb.from('messages').insert({
+        name, email, subject, message
+    });
+
+    if (error) {
+        showAlert('contactAlert', translateError(error), 'error');
+        return;
+    }
+    showAlert('contactAlert', '✓ Pesan terkirim! Tim kami akan merespon dalam 1x24 jam.', 'success');
+    document.getElementById('contactForm').reset();
+});
+
+// === LOGIN TABS (Zentra / Admin) ===
+function switchLoginMode(mode, btn) {
+    document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    if (mode === 'admin') {
+        document.getElementById('loginEmail').value = 'admin@zentra.id';
+        document.getElementById('loginPassword').value = 'admin123';
+        showAlert('loginAlert', '👑 Mode Admin — klik Login untuk masuk dengan akun admin Supabase.', 'info');
+    } else {
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
+    }
+}
+
+// === LOGIN DENGAN GOOGLE (Supabase OAuth) ===
+async function loginWithGoogle() {
+    try {
+        const redirectTo = window.location.origin + window.location.pathname + '#dashboard';
+        const { error } = await sb.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo }
+        });
+        if (error) {
+            alert('Login Google belum diaktifkan. Hubungi admin atau gunakan email/password.');
+            console.warn('[Google OAuth error]', error);
+        }
+    } catch (e) {
+        alert('Login Google belum diaktifkan. Hubungi admin atau gunakan email/password.');
+        console.warn('[Google OAuth exception]', e);
+    }
+}
+
+// === LOGIN ===
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    const password = document.getElementById('loginPassword').value;
+
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+        showAlert('loginAlert', translateError(error), 'error');
+        return;
+    }
+    await refreshSession();
+    const name = (currentUser && currentUser.fullname) || email;
+    showAlert('loginAlert', `Selamat datang, ${name}!`, 'success');
+    setTimeout(() => navigate('dashboard'), 800);
+});
+
+// === REGISTER ===
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fullname = document.getElementById('regFullname').value.trim();
+    const email = document.getElementById('regEmail').value.trim().toLowerCase();
+    const phone = document.getElementById('regPhone').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const confirm = document.getElementById('regConfirm').value;
+
+    if (password !== confirm) {
+        showAlert('registerAlert', 'Password dan konfirmasi tidak sama!');
+        return;
+    }
+
+    const { data, error } = await sb.auth.signUp({
+        email,
+        password,
+        options: { data: { fullname, phone } }
+    });
+
+    if (error) {
+        showAlert('registerAlert', translateError(error), 'error');
+        return;
+    }
+
+    // Cek apakah session langsung aktif (email confirmation OFF) atau perlu verifikasi
+    if (data && data.session) {
+        await refreshSession();
+        showAlert('registerAlert', 'Akun berhasil dibuat! Mengalihkan ke dashboard...', 'success');
+        setTimeout(() => navigate('dashboard'), 1000);
+    } else {
+        showAlert('registerAlert', 'Akun berhasil dibuat! Silakan cek email Anda untuk verifikasi, lalu login.', 'success');
+        setTimeout(() => navigate('login'), 1500);
+    }
+});
+
+// === CHECKOUT ===
+let selectedPeriod = 1;
+const PERIODS = [
+    { months: 1, label: '1 Bulan', discount: 0 },
+    { months: 3, label: '3 Bulan', discount: 5 },
+    { months: 6, label: '6 Bulan', discount: 10 },
+    { months: 12, label: '12 Bulan', discount: 20 }
+];
+
+function renderCheckout() {
+    if (!pendingOrder) {
+        document.getElementById('orderSummary').innerHTML = `
+            <div class="empty"><div class="ic">🛒</div><h3>Belum ada item</h3><p>Pilih paket dari halaman Paket</p>
+            <a class="btn btn-primary" style="margin-top:16px;" onclick="navigate('paket')">Lihat Paket</a></div>`;
+        document.getElementById('checkoutForm').style.display = 'none';
+        return;
+    }
+    document.getElementById('checkoutForm').style.display = 'block';
+    selectedPeriod = 1;
+    const user = getUser();
+    if (user) {
+        document.getElementById('ckFullname').value = user.fullname;
+        document.getElementById('ckEmail').value = user.email;
+        document.getElementById('ckPhone').value = user.phone || '';
+    } else {
+        document.getElementById('ckFullname').value = '';
+        document.getElementById('ckEmail').value = '';
+        document.getElementById('ckPhone').value = '';
+    }
+    renderSummary();
+}
+
+function renderSummary() {
+    if (!pendingOrder) return;
+    const period = PERIODS.find(p => p.months === selectedPeriod);
+    const subtotal = pendingOrder.price * (pendingOrder.type === 'domain' ? 1 : period.months);
+    const discount = pendingOrder.type === 'domain' ? 0 : subtotal * (period.discount / 100);
+    const ppn = (subtotal - discount) * 0.11;
+    const total = subtotal - discount + ppn;
+
+    document.getElementById('orderSummary').innerHTML = `
+        <div style="background:rgba(20,184,166,0.1);border:1px solid rgba(20,184,166,0.3);padding:16px;border-radius:8px;margin-bottom:20px;">
+            <h4 style="color:var(--accent);margin-bottom:4px;">${pendingOrder.name}</h4>
+            <small style="color:var(--text-muted);">Tipe: ${pendingOrder.type.toUpperCase()}</small>
+        </div>
+        ${pendingOrder.type !== 'domain' ? `
+            <div class="form-group">
+                <label>Periode</label>
+                <select id="periodSelect">
+                    ${PERIODS.map(p => `<option value="${p.months}" ${p.months === selectedPeriod ? 'selected' : ''}>${p.label}${p.discount > 0 ? ` (Hemat ${p.discount}%)` : ''}</option>`).join('')}
+                </select>
+            </div>` : ''}
+        <div class="sum-item"><span>Harga ${pendingOrder.type === 'domain' ? '(1 tahun)' : `(${period.months}x)`}</span><span>Rp ${subtotal.toLocaleString('id-ID')}</span></div>
+        ${discount > 0 ? `<div class="sum-item" style="color:#34d399;"><span>Diskon ${period.discount}%</span><span>− Rp ${discount.toLocaleString('id-ID')}</span></div>` : ''}
+        <div class="sum-item"><span>PPN 11%</span><span>Rp ${Math.round(ppn).toLocaleString('id-ID')}</span></div>
+        <div class="sum-total"><span>Total</span><span>Rp ${Math.round(total).toLocaleString('id-ID')}</span></div>
+    `;
+    const sel = document.getElementById('periodSelect');
+    if (sel) sel.addEventListener('change', (e) => { selectedPeriod = parseInt(e.target.value); renderSummary(); });
+}
+
+document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    // Pastikan currentUser ada (refresh jika belum)
+    if (!currentUser) await refreshSession();
+    const user = getUser();
+    if (!user) {
+        showAlert('checkoutAlert', 'Anda harus <a onclick="navigate(\'login\')" style="color:#f87171;font-weight:bold;cursor:pointer;">login</a> dulu untuk melakukan pembelian.', 'error');
+        return;
+    }
+    if (!pendingOrder) {
+        showAlert('checkoutAlert', 'Belum ada item yang dipilih. Silakan pilih paket dulu.', 'error');
+        return;
+    }
+    const period = PERIODS.find(p => p.months === selectedPeriod);
+    const subtotal = pendingOrder.price * (pendingOrder.type === 'domain' ? 1 : period.months);
+    const discount = pendingOrder.type === 'domain' ? 0 : subtotal * (period.discount / 100);
+    const ppn = (subtotal - discount) * 0.11;
+    const total = Math.round(subtotal - discount + ppn);
+
+    const payload = {
+        user_id: user.id,
+        name: pendingOrder.name,
+        type: pendingOrder.type,
+        period: selectedPeriod,
+        price: total,
+        payment: document.getElementById('ckPayment').value
+    };
+
+    const { data, error } = await sb.from('orders').insert(payload).select().single();
+    if (error) {
+        showAlert('checkoutAlert', translateError(error), 'error');
+        return;
+    }
+    const invoiceNo = 'INV-' + String(data.id).padStart(6, '0');
+    showAlert('checkoutAlert', `<strong>✓ Pembayaran berhasil!</strong> Invoice <strong>${invoiceNo}</strong> dibuat. Layanan aktif. Mengalihkan ke dashboard...`, 'success');
+    pendingOrder = null;
+    setTimeout(() => navigate('dashboard'), 2200);
+});
+
+// === DASHBOARD ===
+async function renderDashboard() {
+    if (!currentUser) await refreshSession();
+    const user = getUser();
+    if (!user) { navigate('login'); return; }
+    document.getElementById('dashUserName').textContent = user.fullname;
+    document.getElementById('dashUserEmail').textContent = user.email;
+    document.getElementById('dashAvatar').textContent = (user.fullname || 'U').charAt(0).toUpperCase();
+    await renderOverview();
+}
+
+async function switchDashSection(sec, el) {
+    document.querySelectorAll('.dash-menu a').forEach(a => a.classList.remove('active'));
+    if (el) el.classList.add('active');
+    document.querySelectorAll('.dash-section').forEach(s => s.style.display = 'none');
+    document.getElementById('dash-' + sec).style.display = 'block';
+    const titles = {
+        overview: ['Selamat datang!', 'Ini ringkasan akun Anda hari ini.'],
+        hosting: ['Hosting Saya', 'Kelola semua layanan hosting Anda.'],
+        domain: ['Domain Saya', 'Daftar domain yang Anda miliki.'],
+        invoice: ['Invoice', 'Riwayat transaksi & pembayaran.'],
+        profile: ['Profil', 'Atur informasi akun Anda.']
+    };
+    document.getElementById('dashTitle').textContent = titles[sec][0];
+    document.getElementById('dashSubtitle').textContent = titles[sec][1];
+    if (sec === 'overview') await renderOverview();
+    if (sec === 'hosting') await renderHosting();
+    if (sec === 'domain') await renderDomainList();
+    if (sec === 'invoice') await renderInvoice();
+    if (sec === 'profile') renderProfile();
+}
+
+async function renderOverview() {
+    const orders = await getOrders();
+    const hosting = orders.filter(o => o.type !== 'domain');
+    const domain = orders.filter(o => o.type === 'domain');
+    const total = orders.reduce((s, o) => s + Number(o.price), 0);
+    document.getElementById('statHosting').textContent = hosting.length;
+    document.getElementById('statDomain').textContent = domain.length;
+    document.getElementById('statInvoice').textContent = orders.length;
+    document.getElementById('statTotal').textContent = fmtRp(total);
+
+    // Order sudah descending dari getOrders, ambil 5 teratas
+    const recent = orders.slice(0, 5);
+    const box = document.getElementById('recentServices');
+    if (!recent.length) {
+        box.innerHTML = `<div class="empty"><div class="ic">📦</div><h3>Belum ada layanan</h3><p>Mulai dengan membeli paket pertama Anda</p><a class="btn btn-primary" style="margin-top:16px;" onclick="navigate('paket')">Lihat Paket</a></div>`;
+        return;
+    }
+    box.innerHTML = `<table><thead><tr><th>Layanan</th><th>Tipe</th><th>Tanggal</th><th>Status</th><th>Harga</th></tr></thead><tbody>${recent.map(o => {
+        const s = getStatus(o.created_at, o.period);
+        return `<tr><td><strong>${o.name}</strong></td><td>${o.type.toUpperCase()}</td><td>${fmtDate(o.created_at)}</td><td><span class="status status-${s.c}">${s.l}</span></td><td>${fmtRp(o.price)}</td></tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+async function renderHosting() {
+    const all = await getOrders();
+    const orders = all.filter(o => o.type !== 'domain');
+    const box = document.getElementById('hostingList');
+    if (!orders.length) {
+        box.innerHTML = `<div class="empty"><div class="ic">🌐</div><h3>Belum ada hosting</h3><p>Pilih paket untuk memulai</p></div>`;
+        return;
+    }
+    box.innerHTML = `<table><thead><tr><th>Paket</th><th>Tipe</th><th>Mulai</th><th>Berakhir</th><th>Status</th><th>Aksi</th></tr></thead><tbody>${orders.map(o => {
+        const s = getStatus(o.created_at, o.period);
+        return `<tr><td><strong>${o.name}</strong></td><td>${o.type.toUpperCase()}</td><td>${fmtDate(o.created_at)}</td><td>${fmtDate(calcExpiry(o.created_at, o.period))}</td><td><span class="status status-${s.c}">${s.l}</span></td><td><button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;" onclick="showDetail(${o.id})">Detail</button></td></tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+async function renderDomainList() {
+    const all = await getOrders();
+    const orders = all.filter(o => o.type === 'domain');
+    const box = document.getElementById('domainList');
+    if (!orders.length) {
+        box.innerHTML = `<div class="empty"><div class="ic">🔗</div><h3>Belum ada domain</h3><p>Cari domain yang tersedia</p></div>`;
+        return;
+    }
+    box.innerHTML = `<table><thead><tr><th>Domain</th><th>Daftar</th><th>Berakhir</th><th>Status</th><th>Harga</th></tr></thead><tbody>${orders.map(o => {
+        const exp = new Date(o.created_at); exp.setFullYear(exp.getFullYear() + 1);
+        return `<tr><td><strong>${o.name}</strong></td><td>${fmtDate(o.created_at)}</td><td>${fmtDate(exp)}</td><td><span class="status status-active">Aktif</span></td><td>${fmtRp(o.price)}</td></tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+async function renderInvoice() {
+    const orders = await getOrders();
+    const box = document.getElementById('invoiceList');
+    if (!orders.length) {
+        box.innerHTML = `<div class="empty"><div class="ic">📄</div><h3>Belum ada invoice</h3></div>`;
+        return;
+    }
+    box.innerHTML = `<table><thead><tr><th>No. Invoice</th><th>Layanan</th><th>Tanggal</th><th>Total</th><th>Status</th></tr></thead><tbody>${orders.map(o => `<tr><td><strong>INV-${String(o.id).padStart(6,'0')}</strong></td><td>${o.name} (${o.type})</td><td>${fmtDate(o.created_at)}</td><td>${fmtRp(o.price)}</td><td><span class="status status-active">Lunas</span></td></tr>`).join('')}</tbody></table>`;
+}
+
+function renderProfile() {
+    const user = getUser();
+    if (!user) return;
+    const shortId = (user.id || '').toString().slice(0, 8);
+    document.getElementById('profileBox').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+            <div>
+                <div class="form-group"><label>Nama Lengkap</label><input id="profFullname" value="${user.fullname || ''}"></div>
+                <div class="form-group"><label>Email</label><input value="${user.email}" disabled></div>
+                <div class="form-group"><label>Nomor HP</label><input id="profPhone" value="${user.phone || ''}"></div>
+                <button class="btn btn-primary" onclick="updateProfile()">Simpan Perubahan</button>
+            </div>
+            <div style="background:var(--gradient);padding:24px;border-radius:var(--radius);color:white;">
+                <h3 style="margin-bottom:20px;">Info Akun</h3>
+                <p style="margin-bottom:8px;opacity:0.9;"><strong>Role:</strong> ${user.role === 'admin' ? '👑 Admin' : '👤 Customer'}</p>
+                <p style="margin-bottom:8px;opacity:0.9;"><strong>Member sejak:</strong> ${fmtDate(user.createdAt)}</p>
+                <p style="opacity:0.9;"><strong>User ID:</strong> #${shortId}</p>
+            </div>
+        </div>`;
+}
+
+async function updateProfile() {
+    const user = getUser();
+    if (!user) return;
+    const newName = document.getElementById('profFullname').value.trim();
+    const newPhone = document.getElementById('profPhone').value.trim();
+    if (!newName) return alert('Nama tidak boleh kosong');
+
+    const { error } = await sb
+        .from('profiles')
+        .update({ fullname: newName, phone: newPhone })
+        .eq('id', user.id);
+
+    if (error) {
+        alert(translateError(error));
+        return;
+    }
+    // Update cache lokal
+    currentUser.fullname = newName;
+    currentUser.phone = newPhone;
+    document.getElementById('dashUserName').textContent = newName;
+    document.getElementById('dashAvatar').textContent = newName.charAt(0).toUpperCase();
+    alert('Profil berhasil diperbarui!');
+}
+
+async function showDetail(id) {
+    const orders = await getOrders();
+    const o = orders.find(x => x.id === id);
+    if (!o) return;
+    const user = getUser();
+    const cpanelUser = user && user.email ? user.email.split('@')[0] : 'user';
+    alert(`📋 ${o.name}\n\nTipe: ${o.type.toUpperCase()}\nPeriode: ${o.period || 1} bulan\nMulai: ${fmtDate(o.created_at)}\nBerakhir: ${fmtDate(calcExpiry(o.created_at, o.period))}\nHarga: ${fmtRp(o.price)}\n\nIP Server: 103.124.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}\nUsername cPanel: ${cpanelUser}\nStatus: Aktif`);
+}
+
+// === Auth State Listener ===
+sb.auth.onAuthStateChange(async (event, session) => {
+    if (session && session.user) {
+        await refreshSession();
+    } else {
+        currentUser = null;
+        currentProfile = null;
+    }
+    updateNavbarAuth();
+    if (event === 'SIGNED_IN') {
+        const hash = window.location.hash.replace('#', '');
+        if (hash === 'login' || hash === 'register' || hash === '') {
+            navigate('dashboard');
+        }
+    }
+    if (event === 'SIGNED_OUT') {
+        const route = ROUTES[window.location.hash.replace('#', '')];
+        if (route && route.requireAuth) navigate('home');
+    }
+});
+
+// === Initial Load ===
+(async function init() {
+    // Bootstrap admin (fire-and-forget, jangan blokir render)
+    ensureAdminBootstrap();
+    // Pastikan session sudah ter-load sebelum render pertama
+    await refreshSession();
+    const initialPage = window.location.hash.replace('#', '') || 'home';
+    await renderPage(initialPage);
+})();
+</script>
+</body>
+</html>
