@@ -1832,10 +1832,18 @@ function translateError(error) {
 // Untuk bikin admin, set role='admin' di tabel profiles via Supabase Dashboard:
 // UPDATE profiles SET role='admin' WHERE id = (SELECT id FROM auth.users WHERE email='your@email.com');
 
+// === Timeout helper untuk Promise (anti hang) ===
+function withTimeout(promise, ms = 15000, errorMsg = 'Server terlalu lama merespon. Coba lagi.') {
+    return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error(errorMsg)), ms))
+    ]);
+}
+
 // === Refresh session: ambil session + profile, isi cache ===
 async function refreshSession() {
     try {
-        const { data: { session } } = await sb.auth.getSession();
+        const { data: { session } } = await withTimeout(sb.auth.getSession(), 10000, 'getSession timeout');
         if (!session || !session.user) {
             currentUser = null;
             currentProfile = null;
@@ -2024,7 +2032,7 @@ async function renderPage(page) {
     if (route.requireAuth) {
         let session = null;
         try {
-            const res = await sb.auth.getSession();
+            const res = await withTimeout(sb.auth.getSession(), 8000, 'getSession timeout');
             session = res && res.data ? res.data.session : null;
         } catch (e) {
             console.warn('[renderPage getSession]', e);
@@ -2283,7 +2291,11 @@ safeOn('contactForm', 'submit', async (e) => {
     btn.disabled = true;
     btn.innerHTML = '⏳ Mengirim...';
     try {
-        const { error } = await sb.from('messages').insert({ name, email, subject, message });
+        const { error } = await withTimeout(
+            sb.from('messages').insert({ name, email, subject, message }),
+            10000,
+            'Pengiriman pesan timeout - coba lagi.'
+        );
         if (error) {
             showAlert('contactAlert', translateError(error), 'error');
             return;
@@ -2338,7 +2350,11 @@ safeOn('loginForm', 'submit', async (e) => {
     btn.disabled = true;
     btn.innerHTML = '⏳ Memproses...';
     try {
-        const { error } = await sb.auth.signInWithPassword({ email, password });
+        const { error } = await withTimeout(
+            sb.auth.signInWithPassword({ email, password }),
+            15000,
+            'Login timeout - koneksi lambat. Coba lagi.'
+        );
         if (error) {
             showAlert('loginAlert', translateError(error), 'error');
             return;
@@ -2380,11 +2396,15 @@ safeOn('registerForm', 'submit', async (e) => {
     btn.disabled = true;
     btn.innerHTML = '⏳ Memproses...';
     try {
-        const { data, error } = await sb.auth.signUp({
-            email,
-            password,
-            options: { data: { fullname, phone } }
-        });
+        const { data, error } = await withTimeout(
+            sb.auth.signUp({
+                email,
+                password,
+                options: { data: { fullname, phone } }
+            }),
+            15000,
+            'Pendaftaran timeout - koneksi lambat. Coba lagi.'
+        );
 
         if (error) {
             showAlert('registerAlert', translateError(error), 'error');
@@ -2500,7 +2520,11 @@ safeOn('checkoutForm', 'submit', async (e) => {
             payment: document.getElementById('ckPayment').value
         };
 
-        const { data, error } = await sb.from('orders').insert(payload).select().single();
+        const { data, error } = await withTimeout(
+            sb.from('orders').insert(payload).select().single(),
+            12000,
+            'Pembayaran timeout - coba lagi.'
+        );
         if (error) {
             showAlert('checkoutAlert', translateError(error), 'error');
             return;
