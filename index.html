@@ -761,9 +761,12 @@ details.faq p { margin-top: 12px; color: var(--text-muted); font-size: 14px; }
     .dash-stats { grid-template-columns: 1fr 1fr; }
     .auth-wrap, .checkout-wrap, .contact-wrap { grid-template-columns: 1fr; }
     .auth-side { display: none; }
-    .nav-menu, .nav-auth { display: none; }
-    .nav-menu.show { display: flex; position: absolute; flex-direction: column; top: 65px; left: 0; right: 0; background: var(--bg-card); padding: 20px; border-bottom: 1px solid var(--border); }
+    .nav-menu { display: none; }
+    .nav-menu.show { display: flex; position: absolute; flex-direction: column; top: 65px; left: 0; right: 0; background: var(--bg-card); padding: 20px; border-bottom: 1px solid var(--border); z-index: 99; }
     .nav-toggle { display: block; }
+    .nav-auth { display: flex; gap: 6px; }
+    .nav-auth .btn { padding: 8px 12px; font-size: 12px; }
+    .nav-auth .btn-lg { padding: 8px 12px; font-size: 12px; }
     .dash { grid-template-columns: 1fr; }
     .dash-side { display: none; }
     .cta-card { padding: 40px 24px; }
