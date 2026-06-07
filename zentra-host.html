@@ -1710,10 +1710,10 @@ if (typeof supabase === 'undefined' || window.__sbCdnFailed) {
                     <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">Kelola hosting kamu dengan tools profesional. Akses lengkap ke file, database, email, dan konfigurasi server.</p>
                     <div class="cpanel-grid">
                         <div class="cpanel-tile" onclick="infoModal('File Manager', 'Akses dan kelola semua file hosting kamu.\\n\\n• 2.4 GB dari 10 GB digunakan\\n• 1,247 file dalam public_html\\n• Last modified: hari ini', '🗂️')"><div class="ic">🗂️</div><h5>File Manager</h5><p>2.4 GB</p></div>
-                        <div class="cpanel-tile" onclick="openDatabaseManager()"><div class="ic">🗄️</div><h5>MySQL</h5><p>Kelola DB</p></div>
-                        <div class="cpanel-tile" onclick="openEmailManager()"><div class="ic">📧</div><h5>Email</h5><p>Kelola Akun</p></div>
+                        <div class="cpanel-tile" onclick="infoModal('MySQL Databases', 'Database PostgreSQL terhubung ke Supabase.\\n\\n• zentra_main (active)\\n• zentra_logs (active)\\n• zentra_cache (active)', '🗄️')"><div class="ic">🗄️</div><h5>MySQL</h5><p>3 databases</p></div>
+                        <div class="cpanel-tile" onclick="infoModal('Email Manager', 'Buat email professional dengan domain kamu.\\n\\n• admin@zentra.id\\n• support@zentra.id\\n• info@zentra.id', '📧')"><div class="ic">📧</div><h5>Email</h5><p>3 accounts</p></div>
                         <div class="cpanel-tile" onclick="infoModal('SSL/TLS', 'Sertifikat SSL gratis dari Let&#39;s Encrypt.\\n\\n• Status: Active 🟢\\n• Expires: 90 days\\n• Auto-renew: ON', '🔐')"><div class="ic">🔐</div><h5>SSL/TLS</h5><p>Active</p></div>
-                        <div class="cpanel-tile" onclick="openSubdomainManager()"><div class="ic">🔗</div><h5>Subdomain</h5><p>Kelola</p></div>
+                        <div class="cpanel-tile" onclick="infoModal('Subdomains', 'Buat subdomain untuk staging/blog/dll.\\n\\n• www.zentrahost.com\\n• blog.zentrahost.com\\n• shop.zentrahost.com', '🔗')"><div class="ic">🔗</div><h5>Subdomain</h5><p>3 active</p></div>
                         <div class="cpanel-tile" onclick="infoModal('PHP Version', 'Pilih versi PHP untuk website kamu.\\n\\nCurrent: PHP 8.3\\nAvailable: 7.4, 8.0, 8.1, 8.2, 8.3', '🐘')"><div class="ic">🐘</div><h5>PHP Version</h5><p>v8.3</p></div>
                         <div class="cpanel-tile" onclick="infoModal('Cron Jobs', 'Jadwalkan tugas otomatis di server.\\n\\n• Backup harian (active)\\n• Cache cleanup (active)\\n• Health check (active)', '⏰')"><div class="ic">⏰</div><h5>Cron Jobs</h5><p>3 jobs</p></div>
                         <div class="cpanel-tile" onclick="infoModal('Statistics', 'Visitor stats real-time.\\n\\n• Today: 124 visitors\\n• Week: 892 visitors\\n• Bandwidth: 12.4 GB', '📊')"><div class="ic">📊</div><h5>Statistics</h5><p>Live</p></div>
@@ -1725,7 +1725,7 @@ if (typeof supabase === 'undefined' || window.__sbCdnFailed) {
                 <div class="dash-card">
                     <div class="dash-card-head">
                         <h3>🌍 DNS Manager</h3>
-                        <button class="btn btn-primary" onclick="openAddDNSModal()">+ Add Record</button>
+                        <button class="btn btn-primary" onclick="infoModal('Add DNS Record', 'Form tambah DNS record akan dibuka.\\n\\nSaat ini fitur ini dalam mode demo. Untuk production, integrasi dengan Cloudflare API atau registrar API diperlukan.', '🌍')">+ Add Record</button>
                     </div>
                     <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">Kelola DNS records untuk domain zentrahost.com</p>
                     <div id="dnsRecords"></div>
@@ -1736,7 +1736,7 @@ if (typeof supabase === 'undefined' || window.__sbCdnFailed) {
                 <div class="dash-card">
                     <div class="dash-card-head">
                         <h3>💾 Backup Manager</h3>
-                        <button class="btn btn-primary" onclick="confirmModal('Buat Backup?', 'Sistem akan membuat backup lengkap (files + database + email).\\n\\nUkuran estimasi: 500MB - 2.5GB', createBackup, 'Mulai Backup')">+ Buat Backup Baru</button>
+                        <button class="btn btn-primary" onclick="confirmModal('Buat Backup?', 'Sistem akan membuat backup lengkap (files + database + email).\\n\\nEstimasi waktu: 2-3 menit.\\nUkuran: ~2.5 GB', () => { showToast('✓ Backup dimulai. Notifikasi akan dikirim saat selesai.', 'success', 5000); }, 'Mulai Backup')">+ Buat Backup Baru</button>
                     </div>
                     <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">Backup otomatis harian. Tersimpan 30 hari terakhir.</p>
                     <div id="backupList"></div>
@@ -1970,105 +1970,6 @@ function toggleDashDrawer() {
     if (!side || !backdrop) return;
     side.classList.toggle('open');
     backdrop.classList.toggle('show');
-}
-
-// === Resource Usage REAL dari orders + counts ===
-async function renderResources() {
-    const el = document.getElementById('resourceUsage');
-    if (!el || !currentUser) return;
-    try {
-        // Hitung total disk & bandwidth dari paket aktif
-        const PAKET_QUOTA = {
-            'Starter': { disk: 5, bw: 20 },
-            'Business': { disk: 30, bw: 100 },
-            'Pro': { disk: 100, bw: 1000 },
-            'Enterprise': { disk: 500, bw: 5000 },
-            'Cloud S': { disk: 40, bw: 1000 },
-            'Cloud M': { disk: 80, bw: 2000 },
-            'Cloud L': { disk: 160, bw: 4000 },
-            'Cloud XL': { disk: 320, bw: 10000 },
-            'VPS Lite': { disk: 40, bw: 1000 },
-            'VPS Standard': { disk: 80, bw: 2000 },
-            'VPS Pro': { disk: 160, bw: 4000 },
-            'VPS Ultimate': { disk: 320, bw: 10000 }
-        };
-        const orders = await getOrders();
-        const hosting = orders.filter(o => o.type !== 'domain');
-        let totalDisk = 0, totalBw = 0;
-        hosting.forEach(o => {
-            const q = PAKET_QUOTA[o.name];
-            if (q) { totalDisk += q.disk; totalBw += q.bw; }
-        });
-        if (totalDisk === 0) { totalDisk = 1; totalBw = 1; } // avoid /0
-
-        // Hitung resource yang dipakai dari count subdomains/emails/databases/backups
-        const [{ count: subC }, { count: emC }, { count: dbC }, { count: bkC }] = await Promise.all([
-            sb.from('subdomains').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id),
-            sb.from('email_accounts').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id),
-            sb.from('user_databases').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id),
-            sb.from('backups').select('size_mb', { count: 'exact' }).eq('user_id', currentUser.id)
-        ]);
-        const subdomainCount = subC || 0;
-        const emailCount = emC || 0;
-        const dbCount = dbC || 0;
-        const backupSizeGb = (bkC || 0); // total backup count
-
-        // Used disk = 0.1 GB per subdomain + 0.05 GB per email + 0.5 GB per DB + backup
-        const usedDisk = Math.min(totalDisk, subdomainCount * 0.1 + emailCount * 0.05 + dbCount * 0.5);
-        const usedBw = Math.min(totalBw, (subdomainCount + emailCount + dbCount) * 0.8); // simulasi bandwidth
-
-        const diskPct = Math.min(100, Math.round(usedDisk / totalDisk * 100));
-        const bwPct = Math.min(100, Math.round(usedBw / totalBw * 100));
-        const emailPct = Math.min(100, Math.round(emailCount / 10 * 100)); // max 10 untuk visual
-        const dbPct = Math.min(100, Math.round(dbCount / 10 * 100));
-
-        el.innerHTML = `
-            <div class="resource-item">
-                <div class="resource-label"><span class="name">💾 Disk Space (NVMe SSD)</span><span class="val">${usedDisk.toFixed(2)} / ${totalDisk} GB</span></div>
-                <div class="progress-bar"><div class="progress-fill ${diskPct > 80 ? 'warn' : ''}" style="width:${diskPct}%"></div></div>
-            </div>
-            <div class="resource-item">
-                <div class="resource-label"><span class="name">🌐 Bandwidth (Bulan ini)</span><span class="val">${usedBw.toFixed(2)} / ${totalBw} GB</span></div>
-                <div class="progress-bar"><div class="progress-fill ${bwPct > 80 ? 'warn' : ''}" style="width:${bwPct}%"></div></div>
-            </div>
-            <div class="resource-item">
-                <div class="resource-label"><span class="name">📧 Email Accounts</span><span class="val">${emailCount} aktif</span></div>
-                <div class="progress-bar"><div class="progress-fill" style="width:${emailPct}%"></div></div>
-            </div>
-            <div class="resource-item">
-                <div class="resource-label"><span class="name">🗄️ Database MySQL</span><span class="val">${dbCount} aktif</span></div>
-                <div class="progress-bar"><div class="progress-fill" style="width:${dbPct}%"></div></div>
-            </div>
-            <div class="resource-item" style="border-bottom:none;">
-                <div class="resource-label"><span class="name">🔗 Subdomains</span><span class="val">${subdomainCount} aktif</span></div>
-                <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100, subdomainCount*10)}%"></div></div>
-            </div>
-        `;
-    } catch (e) {
-        console.warn('[renderResources]', e);
-    }
-}
-
-// === HELPERS: Log Activity + Create Notification (REAL CRUD) ===
-async function logActivity(action, description, icon = '📌', color = 'default') {
-    if (!currentUser) return;
-    try {
-        await sb.from('activity_log').insert({
-            user_id: currentUser.id,
-            action, description, icon, color
-        });
-    } catch (e) { console.warn('[logActivity]', e); }
-}
-
-async function createNotification(title, description, icon = '🔔') {
-    if (!currentUser) return;
-    try {
-        await sb.from('notifications').insert({
-            user_id: currentUser.id,
-            title, description, icon, is_read: false
-        });
-        renderNotifications(); // refresh bell badge
-    } catch (e) { console.warn('[createNotification]', e); }
 }
 
 // === Utils ===
@@ -2532,9 +2433,6 @@ safeOn('registerForm', 'submit', async (e) => {
         successPending = true; // tahan button tetap disabled sampai navigate
         if (data && data.session) {
             await refreshSession();
-            // Auto trigger welcome notification + activity log
-            await createNotification('🎉 Selamat datang di Zentra Host!', 'Akun kamu aktif. Yuk eksplor dashboard kamu.', '🎉');
-            await logActivity('Akun didaftarkan', 'Email: ' + email, '✅', 'success');
             showAlert('registerAlert', 'Akun berhasil dibuat! Mengalihkan ke dashboard...', 'success');
             setTimeout(() => navigate('dashboard'), 1000);
         } else {
@@ -2658,9 +2556,6 @@ safeOn('checkoutForm', 'submit', async (e) => {
             return;
         }
         const invoiceNo = 'INV-' + String(data.id).padStart(6, '0');
-        // Auto trigger: log activity + notification
-        await logActivity('💰 Pembelian sukses', pendingOrder.name + ' (' + pendingOrder.type + ') - ' + fmtRp(total), '🛒', 'success');
-        await createNotification('Pembayaran Berhasil!', invoiceNo + ' - ' + pendingOrder.name + ' aktif', '🎉');
         showAlert('checkoutAlert', `<strong>🎉 Pembayaran berhasil!</strong> Invoice <strong>${invoiceNo}</strong> dibuat. Layanan aktif. Mengalihkan ke dashboard...`, 'success');
         confetti(80); // 🎊 Celebrate!
         pendingOrder = null;
@@ -2716,113 +2611,73 @@ function renderMiniChart(elId, data) {
         </svg>`;
 }
 
-async function renderActivity() {
+function renderActivity() {
     const el = document.getElementById('activityTimeline');
     if (!el) return;
-    if (!currentUser) {
-        el.innerHTML = '<div class="empty" style="padding:20px;">Login untuk lihat aktivitas</div>';
-        return;
-    }
-    try {
-        const { data, error } = await sb.from('activity_log')
-            .select('*').eq('user_id', currentUser.id)
-            .order('created_at', { ascending: false }).limit(10);
-        if (error) throw error;
-        const activities = data || [];
-        if (activities.length === 0) {
-            el.innerHTML = '<div class="empty" style="padding:20px;color:var(--text-muted);">📋 Belum ada aktivitas. Mulai dengan beli paket atau update profil!</div>';
-            return;
-        }
-        el.innerHTML = activities.map(a => `
-            <div class="timeline-item">
-                <div class="timeline-icon ${a.color === 'default' ? '' : a.color}">${a.icon || '📌'}</div>
-                <div class="timeline-content">
-                    <h5>${a.action}</h5>
-                    <p>${a.description || ''}</p>
-                    <time class="timeline-time">${timeAgo(a.created_at)}</time>
-                </div>
+    const activities = [
+        { icon: '🛒', cls: '', title: 'Pembelian paket berhasil', desc: 'Business / Shared Hosting', time: 'Baru saja' },
+        { icon: '👤', cls: 'purple', title: 'Profil diperbarui', desc: 'Update informasi akun', time: '5 menit lalu' },
+        { icon: '🔐', cls: 'orange', title: 'Login dari device baru', desc: 'Google OAuth · Chrome', time: '1 jam lalu' },
+        { icon: '✅', cls: '', title: 'Akun terverifikasi', desc: 'Email verifikasi sukses', time: 'Kemarin' }
+    ];
+    el.innerHTML = activities.map(a => `
+        <div class="timeline-item">
+            <div class="timeline-icon ${a.cls}">${a.icon}</div>
+            <div class="timeline-content">
+                <h5>${a.title}</h5>
+                <p>${a.desc}</p>
+                <time class="timeline-time">${a.time}</time>
             </div>
-        `).join('');
-    } catch (e) {
-        console.warn('[renderActivity]', e);
-        el.innerHTML = '<div class="empty" style="padding:20px;">⚠️ Gagal memuat aktivitas</div>';
-    }
+        </div>
+    `).join('');
 }
 
 // === NOTIFICATIONS ===
-// Format relative time (e.g. "5 menit lalu")
-function timeAgo(date) {
-    const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
-    if (diff < 60) return 'Baru saja';
-    if (diff < 3600) return Math.floor(diff/60) + ' menit lalu';
-    if (diff < 86400) return Math.floor(diff/3600) + ' jam lalu';
-    if (diff < 604800) return Math.floor(diff/86400) + ' hari lalu';
-    return fmtDate(date);
-}
+let notifications = [
+    { id: 1, icon: '🎉', title: 'Selamat datang di Zentra!', desc: 'Akun kamu sudah aktif. Yuk eksplorasi fitur lengkap kami.', time: 'Baru saja', unread: true },
+    { id: 2, icon: '🛒', title: 'Pembelian Business sukses', desc: 'Invoice INV-000001 telah dibuat. Layanan aktif.', time: '5 menit lalu', unread: true },
+    { id: 3, icon: '💡', title: 'Tips: Aktifkan 2FA', desc: 'Tingkatkan keamanan akun dengan two-factor authentication.', time: '1 jam lalu', unread: false },
+    { id: 4, icon: '📢', title: 'Update sistem', desc: 'Server di-upgrade ke NVMe Gen 4. Performa naik 30%!', time: 'Kemarin', unread: false }
+];
 
-async function renderNotifications() {
+function renderNotifications() {
     const el = document.getElementById('notifItems');
     const badge = document.getElementById('notifBadge');
     if (!el) return;
-    if (!currentUser) {
-        el.innerHTML = '<div class="notif-empty">📭<br>Login untuk lihat notifikasi</div>';
-        if (badge) badge.style.display = 'none';
+    const unreadCount = notifications.filter(n => n.unread).length;
+    if (badge) {
+        badge.textContent = unreadCount;
+        badge.style.display = unreadCount > 0 ? 'grid' : 'none';
+    }
+    if (notifications.length === 0) {
+        el.innerHTML = '<div class="notif-empty">📭<br>Belum ada notifikasi</div>';
         return;
     }
-    try {
-        const { data, error } = await sb.from('notifications')
-            .select('*').eq('user_id', currentUser.id)
-            .order('created_at', { ascending: false }).limit(20);
-        if (error) throw error;
-        const notifs = data || [];
-        const unreadCount = notifs.filter(n => !n.is_read).length;
-        if (badge) {
-            badge.textContent = unreadCount;
-            badge.style.display = unreadCount > 0 ? 'grid' : 'none';
-        }
-        if (notifs.length === 0) {
-            el.innerHTML = '<div class="notif-empty">📭<br>Belum ada notifikasi</div>';
-            return;
-        }
-        el.innerHTML = notifs.map(n => `
-            <div class="notif-item ${!n.is_read ? 'unread' : ''}" onclick="markRead(${n.id})">
-                <div class="ic">${n.icon || '🔔'}</div>
-                <div class="content">
-                    <h5>${n.title}</h5>
-                    <p>${n.description || ''}</p>
-                    <time>${timeAgo(n.created_at)}</time>
-                </div>
+    el.innerHTML = notifications.map(n => `
+        <div class="notif-item ${n.unread ? 'unread' : ''}" onclick="markRead(${n.id})">
+            <div class="ic">${n.icon}</div>
+            <div class="content">
+                <h5>${n.title}</h5>
+                <p>${n.desc}</p>
+                <time>${n.time}</time>
             </div>
-        `).join('');
-    } catch (e) {
-        console.warn('[renderNotifications]', e);
-        el.innerHTML = '<div class="notif-empty">⚠️<br>Gagal memuat notifikasi</div>';
-    }
+        </div>
+    `).join('');
 }
 
 function toggleNotif() {
     const w = document.getElementById('notifWrap');
     if (w) w.classList.toggle('open');
 }
-
-async function markRead(id) {
-    if (!currentUser) return;
-    try {
-        await sb.from('notifications').update({ is_read: true }).eq('id', id).eq('user_id', currentUser.id);
-        renderNotifications();
-    } catch (e) { console.warn('[markRead]', e); }
+function markRead(id) {
+    const n = notifications.find(x => x.id === id);
+    if (n) n.unread = false;
+    renderNotifications();
 }
-
-async function markAllRead() {
-    if (!currentUser) return;
-    try {
-        await sb.from('notifications').update({ is_read: true }).eq('user_id', currentUser.id).eq('is_read', false);
-        renderNotifications();
-        showToast('Semua notifikasi ditandai dibaca', 'success');
-    } catch (e) {
-        console.warn('[markAllRead]', e);
-        showToast('Gagal update notifikasi', 'error');
-    }
+function markAllRead() {
+    notifications.forEach(n => n.unread = false);
+    renderNotifications();
+    showToast('Semua notifikasi ditandai dibaca', 'success');
 }
 
 // Click outside closes notif
@@ -2848,368 +2703,58 @@ function confetti(count = 60) {
 }
 
 // === cPanel / DNS / Backup ===
-// === cPanel Real CRUD ===
-async function openSubdomainManager() {
-    if (!currentUser) { showToast('Login dulu', 'error'); return; }
-    const { data: subs } = await sb.from('subdomains').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-    const list = (subs || []).map(s => `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:6px;">
-            <div><strong>${escapeHtml(s.subdomain)}.zentrahost.com</strong><br><small style="color:var(--text-muted);">→ ${escapeHtml(s.target)}</small></div>
-            <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" onclick="deleteSubdomain(${s.id})">🗑️</button>
-        </div>
-    `).join('') || '<p style="color:var(--text-muted);text-align:center;padding:20px;">Belum ada subdomain</p>';
-    showModal({ icon: '🔗', title: 'Subdomain Manager', body: '', actions: [] });
-    document.getElementById('modalBody').innerHTML = `
-        <div style="text-align:left;">
-            <div style="margin-bottom:16px;">
-                <label style="font-size:13px;color:var(--text-muted);">Subdomain baru:</label>
-                <div style="display:flex;gap:6px;margin-top:6px;">
-                    <input type="text" id="newSubdomain" placeholder="blog" style="flex:1;padding:10px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;color:var(--text);">
-                    <span style="display:flex;align-items:center;color:var(--text-muted);font-size:13px;">.zentrahost.com</span>
-                </div>
-            </div>
-            <div style="max-height:300px;overflow-y:auto;">${list}</div>
-        </div>
-    `;
-    document.getElementById('modalActions').innerHTML = `
-        <button class="btn btn-ghost" onclick="closeModal()">Tutup</button>
-        <button class="btn btn-primary" onclick="addSubdomain()">+ Tambah</button>
-    `;
-}
-
-async function addSubdomain() {
-    const sub = document.getElementById('newSubdomain').value.trim().toLowerCase();
-    if (!sub || !/^[a-z0-9-]+$/.test(sub)) { showToast('Subdomain hanya huruf, angka, strip', 'error'); return; }
-    try {
-        const { error } = await sb.from('subdomains').insert({ user_id: currentUser.id, subdomain: sub, target: 'public_html/' + sub });
-        if (error) { if (error.code === '23505') throw new Error('Subdomain sudah ada'); throw error; }
-        showToast('✓ Subdomain dibuat: ' + sub + '.zentrahost.com', 'success');
-        await logActivity('Subdomain dibuat', sub + '.zentrahost.com', '🔗', 'success');
-        await createNotification('Subdomain Aktif', sub + '.zentrahost.com siap digunakan', '🔗');
-        closeModal(); openSubdomainManager();
-    } catch (e) { showToast('Gagal: ' + (e.message || e), 'error'); }
-}
-
-async function deleteSubdomain(id) {
-    confirmModal('Hapus Subdomain?', 'Subdomain akan dihapus permanen.', async () => {
-        try {
-            await sb.from('subdomains').delete().eq('id', id).eq('user_id', currentUser.id);
-            showToast('✓ Subdomain dihapus', 'success');
-            await logActivity('Subdomain dihapus', 'ID ' + id, '🗑️', 'danger');
-            closeModal(); openSubdomainManager();
-        } catch (e) { showToast('Gagal: ' + (e.message || e), 'error'); }
-    }, 'Hapus');
-}
-
-async function openEmailManager() {
-    if (!currentUser) { showToast('Login dulu', 'error'); return; }
-    const { data: emails } = await sb.from('email_accounts').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-    const list = (emails || []).map(em => `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:6px;">
-            <div><strong>${escapeHtml(em.email_address)}</strong><br><small style="color:var(--text-muted);">Quota: ${em.quota_mb} MB</small></div>
-            <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" onclick="deleteEmail(${em.id})">🗑️</button>
-        </div>
-    `).join('') || '<p style="color:var(--text-muted);text-align:center;padding:20px;">Belum ada email</p>';
-    showModal({ icon: '📧', title: 'Email Manager', body: '', actions: [] });
-    document.getElementById('modalBody').innerHTML = `
-        <div style="text-align:left;">
-            <div style="margin-bottom:16px;">
-                <label style="font-size:13px;color:var(--text-muted);">Email baru:</label>
-                <div style="display:flex;gap:6px;margin-top:6px;">
-                    <input type="text" id="newEmail" placeholder="admin" style="flex:1;padding:10px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;color:var(--text);">
-                    <span style="display:flex;align-items:center;color:var(--text-muted);font-size:13px;">@zentrahost.com</span>
-                </div>
-            </div>
-            <div style="max-height:300px;overflow-y:auto;">${list}</div>
-        </div>
-    `;
-    document.getElementById('modalActions').innerHTML = `
-        <button class="btn btn-ghost" onclick="closeModal()">Tutup</button>
-        <button class="btn btn-primary" onclick="addEmail()">+ Buat Email</button>
-    `;
-}
-
-async function addEmail() {
-    const prefix = document.getElementById('newEmail').value.trim().toLowerCase();
-    if (!prefix || !/^[a-z0-9._-]+$/.test(prefix)) { showToast('Format email tidak valid', 'error'); return; }
-    const full = prefix + '@zentrahost.com';
-    try {
-        const { error } = await sb.from('email_accounts').insert({ user_id: currentUser.id, email_address: full, quota_mb: 250 });
-        if (error) { if (error.code === '23505') throw new Error('Email sudah ada'); throw error; }
-        showToast('✓ Email aktif: ' + full, 'success');
-        await logActivity('Email account dibuat', full, '📧', 'success');
-        await createNotification('Email Account Aktif', full + ' siap digunakan (250 MB)', '📧');
-        closeModal(); openEmailManager();
-    } catch (e) { showToast('Gagal: ' + (e.message || e), 'error'); }
-}
-
-async function deleteEmail(id) {
-    confirmModal('Hapus Email?', 'Email account akan dihapus permanen.', async () => {
-        await sb.from('email_accounts').delete().eq('id', id).eq('user_id', currentUser.id);
-        showToast('✓ Email dihapus', 'success');
-        await logActivity('Email account dihapus', 'ID ' + id, '🗑️', 'danger');
-        closeModal(); openEmailManager();
-    }, 'Hapus');
-}
-
-async function openDatabaseManager() {
-    if (!currentUser) { showToast('Login dulu', 'error'); return; }
-    const { data: dbs } = await sb.from('user_databases').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-    const list = (dbs || []).map(d => `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:6px;">
-            <div><strong>${escapeHtml(d.database_name)}</strong><br><small style="color:var(--text-muted);">User: ${escapeHtml(d.db_user)}</small></div>
-            <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" onclick="deleteDatabase(${d.id})">🗑️</button>
-        </div>
-    `).join('') || '<p style="color:var(--text-muted);text-align:center;padding:20px;">Belum ada database</p>';
-    showModal({ icon: '🗄️', title: 'MySQL Database Manager', body: '', actions: [] });
-    document.getElementById('modalBody').innerHTML = `
-        <div style="text-align:left;">
-            <div style="margin-bottom:16px;">
-                <label style="font-size:13px;color:var(--text-muted);">Nama Database baru:</label>
-                <input type="text" id="newDbName" placeholder="myblog_db" style="width:100%;margin-top:6px;padding:10px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;color:var(--text);">
-            </div>
-            <div style="max-height:300px;overflow-y:auto;">${list}</div>
-        </div>
-    `;
-    document.getElementById('modalActions').innerHTML = `
-        <button class="btn btn-ghost" onclick="closeModal()">Tutup</button>
-        <button class="btn btn-primary" onclick="addDatabase()">+ Buat Database</button>
-    `;
-}
-
-async function addDatabase() {
-    const dbName = document.getElementById('newDbName').value.trim().toLowerCase();
-    if (!dbName || !/^[a-z0-9_]+$/.test(dbName)) { showToast('Nama hanya huruf, angka, underscore', 'error'); return; }
-    const dbUser = (currentUser.email || 'user').split('@')[0] + '_' + dbName.slice(0, 8);
-    try {
-        const { error } = await sb.from('user_databases').insert({ user_id: currentUser.id, database_name: dbName, db_user: dbUser });
-        if (error) { if (error.code === '23505') throw new Error('Database sudah ada'); throw error; }
-        showToast('✓ Database dibuat: ' + dbName, 'success');
-        await logActivity('Database MySQL dibuat', dbName + ' (user: ' + dbUser + ')', '🗄️', 'success');
-        await createNotification('Database Aktif', dbName + ' siap digunakan', '🗄️');
-        closeModal(); openDatabaseManager();
-    } catch (e) { showToast('Gagal: ' + (e.message || e), 'error'); }
-}
-
-async function deleteDatabase(id) {
-    confirmModal('Hapus Database?', 'Database & semua data di dalamnya akan hilang permanen!', async () => {
-        await sb.from('user_databases').delete().eq('id', id).eq('user_id', currentUser.id);
-        showToast('✓ Database dihapus', 'success');
-        await logActivity('Database dihapus', 'ID ' + id, '🗑️', 'danger');
-        closeModal(); openDatabaseManager();
-    }, 'Hapus');
-}
-
 function openCpanel() {
     infoModal('cPanel Login', '🛠️ Mengarahkan ke cPanel...\n\nUsername: ' + (currentUser && currentUser.email ? currentUser.email.split('@')[0] : 'user') + '\nServer: srv01.zentra.id\nPort: 2083 (SSL)\n\nKlik OK untuk masuk dashboard cPanel mockup di sidebar.', '🛠️');
     setTimeout(() => switchDashSection('cpanel', document.querySelector('.dash-menu a[data-section=cpanel]')), 300);
 }
 
-// === DNS Manager — REAL CRUD ===
-async function renderDNS() {
+function renderDNS() {
     const el = document.getElementById('dnsRecords');
     if (!el) return;
-    if (!currentUser) { el.innerHTML = '<div class="empty">Login dulu</div>'; return; }
-    try {
-        const { data, error } = await sb.from('dns_records')
-            .select('*').eq('user_id', currentUser.id)
-            .order('created_at', { ascending: false });
-        if (error) throw error;
-        const records = data || [];
-        if (records.length === 0) {
-            el.innerHTML = `<div class="empty" style="padding:40px;">
-                <div class="ic">🌍</div>
-                <h3>Belum ada DNS Record</h3>
-                <p>Tambah record pertama untuk mulai kelola domain kamu</p>
-            </div>`;
-            return;
-        }
-        el.innerHTML = records.map(r => `
-            <div class="dns-record">
-                <span class="type">${r.record_type}</span>
-                <span><strong>${escapeHtml(r.name)}</strong></span>
-                <span style="color:var(--text-muted);font-size:12px;word-break:break-all;">${escapeHtml(r.value)}</span>
-                <span style="color:var(--text-muted);font-size:12px;">TTL ${r.ttl}</span>
-                <span style="display:flex;gap:6px;">
-                    <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" onclick="deleteDNSRecord(${r.id})">🗑️ Hapus</button>
-                </span>
-            </div>
-        `).join('');
-    } catch (e) {
-        console.warn('[renderDNS]', e);
-        el.innerHTML = '<div class="empty">⚠️ Gagal memuat DNS records</div>';
-    }
-}
-
-function escapeHtml(s) {
-    return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-function openAddDNSModal() {
-    if (!currentUser) { showToast('Login dulu', 'error'); return; }
-    showModal({
-        icon: '🌍',
-        title: 'Tambah DNS Record',
-        body: '',
-        actions: []
-    });
-    // Replace modal body dengan form custom
-    document.getElementById('modalBody').innerHTML = `
-        <div style="text-align:left;">
-            <div class="form-group">
-                <label>Tipe Record</label>
-                <select id="dnsTypeInput">
-                    <option value="A">A (IPv4 address)</option>
-                    <option value="AAAA">AAAA (IPv6 address)</option>
-                    <option value="CNAME">CNAME (Alias)</option>
-                    <option value="MX">MX (Mail server)</option>
-                    <option value="TXT">TXT (Text)</option>
-                    <option value="NS">NS (Name server)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Domain</label>
-                <input type="text" id="dnsDomainInput" placeholder="zentrahost.com" value="zentrahost.com">
-            </div>
-            <div class="form-group">
-                <label>Nama (@, www, blog, dll)</label>
-                <input type="text" id="dnsNameInput" placeholder="www" value="@">
-            </div>
-            <div class="form-group">
-                <label>Value</label>
-                <input type="text" id="dnsValueInput" placeholder="103.124.95.42">
-            </div>
-            <div class="form-group">
-                <label>TTL (detik)</label>
-                <input type="number" id="dnsTtlInput" placeholder="3600" value="3600">
-            </div>
+    const records = [
+        { type: 'A', name: '@', value: '103.124.95.42', ttl: '3600', editable: false },
+        { type: 'A', name: 'www', value: '103.124.95.42', ttl: '3600', editable: true },
+        { type: 'CNAME', name: 'blog', value: 'zentrahost.com', ttl: '3600', editable: true },
+        { type: 'CNAME', name: 'shop', value: 'shopify.zentrahost.com', ttl: '3600', editable: true },
+        { type: 'MX', name: '@', value: 'mail.zentrahost.com', ttl: '3600', editable: true },
+        { type: 'TXT', name: '@', value: 'v=spf1 include:_spf.google.com', ttl: '3600', editable: true }
+    ];
+    el.innerHTML = records.map((r, i) => `
+        <div class="dns-record">
+            <span class="type">${r.type}</span>
+            <span><strong>${r.name}</strong></span>
+            <span style="color:var(--text-muted);font-size:12px;word-break:break-all;">${r.value}</span>
+            <span style="color:var(--text-muted);font-size:12px;">TTL ${r.ttl}</span>
+            <span style="display:flex;gap:6px;">
+                ${r.editable ? `<button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;" onclick="infoModal('Edit DNS', 'Form edit record DNS akan dibuka.', '🌍')">Edit</button>` : '<span class="status status-active">System</span>'}
+            </span>
         </div>
-    `;
-    document.getElementById('modalActions').innerHTML = `
-        <button class="btn btn-ghost" onclick="closeModal()">Batal</button>
-        <button class="btn btn-primary" onclick="saveDNSRecord()">💾 Simpan</button>
-    `;
+    `).join('');
 }
 
-async function saveDNSRecord() {
-    const record_type = document.getElementById('dnsTypeInput').value;
-    const domain = document.getElementById('dnsDomainInput').value.trim();
-    const name = document.getElementById('dnsNameInput').value.trim();
-    const value = document.getElementById('dnsValueInput').value.trim();
-    const ttl = parseInt(document.getElementById('dnsTtlInput').value) || 3600;
-    if (!domain || !name || !value) { showToast('Semua field wajib diisi', 'error'); return; }
-    try {
-        const { error } = await sb.from('dns_records').insert({
-            user_id: currentUser.id, record_type, domain, name, value, ttl
-        });
-        if (error) throw error;
-        closeModal();
-        showToast('✓ DNS record berhasil ditambah', 'success');
-        await logActivity('DNS Record ditambah', `${record_type} ${name} → ${value}`, '🌍', 'success');
-        await createNotification('DNS Record Baru', `${record_type} record untuk ${name} berhasil dibuat`, '🌍');
-        renderDNS();
-    } catch (e) {
-        console.warn('[saveDNSRecord]', e);
-        showToast('Gagal simpan: ' + (e.message || e), 'error');
-    }
-}
-
-async function deleteDNSRecord(id) {
-    confirmModal('Hapus DNS Record?', 'Record ini akan dihapus permanen.', async () => {
-        try {
-            const { error } = await sb.from('dns_records').delete().eq('id', id).eq('user_id', currentUser.id);
-            if (error) throw error;
-            showToast('✓ DNS record dihapus', 'success');
-            await logActivity('DNS Record dihapus', 'Record ID ' + id, '🗑️', 'danger');
-            renderDNS();
-        } catch (e) {
-            showToast('Gagal hapus: ' + (e.message || e), 'error');
-        }
-    }, 'Hapus');
-}
-
-// === Backup Manager — REAL CRUD ===
-async function renderBackup() {
+function renderBackup() {
     const el = document.getElementById('backupList');
     if (!el) return;
-    if (!currentUser) { el.innerHTML = '<div class="empty">Login dulu</div>'; return; }
-    try {
-        const { data, error } = await sb.from('backups')
-            .select('*').eq('user_id', currentUser.id)
-            .order('created_at', { ascending: false });
-        if (error) throw error;
-        const backups = data || [];
-        if (backups.length === 0) {
-            el.innerHTML = `<div class="empty" style="padding:40px;">
-                <div class="ic">💾</div>
-                <h3>Belum ada Backup</h3>
-                <p>Klik "Buat Backup Baru" untuk membuat backup pertama</p>
-            </div>`;
-            return;
-        }
-        el.innerHTML = backups.map(b => {
-            const auto = b.backup_type === 'auto';
-            const sizeMb = b.size_mb || 0;
-            const sizeStr = sizeMb >= 1024 ? (sizeMb/1024).toFixed(1) + ' GB' : sizeMb + ' MB';
-            return `
-                <div class="backup-card">
-                    <div class="ic">${auto ? '🤖' : '🖱️'}</div>
-                    <div class="info">
-                        <h5>${escapeHtml(b.name)}</h5>
-                        <p>${fmtDate(b.created_at)} · ${sizeStr} · <span class="status status-${b.status === 'completed' ? 'active' : 'pending'}">${b.status === 'completed' ? '✓ ' + b.backup_type : b.status}</span></p>
-                    </div>
-                    <div class="actions">
-                        <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;" onclick="restoreBackup(${b.id}, '${b.name.replace(/'/g, "\\'")}')">Restore</button>
-                        <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;" onclick="deleteBackup(${b.id})">🗑️</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    } catch (e) {
-        console.warn('[renderBackup]', e);
-        el.innerHTML = '<div class="empty">⚠️ Gagal memuat backup</div>';
-    }
-}
-
-async function createBackup() {
-    if (!currentUser) { showToast('Login dulu', 'error'); return; }
-    const name = 'Backup ' + new Date().toLocaleString('id-ID');
-    const sizeMb = Math.floor(Math.random() * 2000) + 500; // simulasi ukuran 500MB-2.5GB
-    try {
-        const { error } = await sb.from('backups').insert({
-            user_id: currentUser.id,
-            name, backup_type: 'manual', size_mb: sizeMb, status: 'completed'
-        });
-        if (error) throw error;
-        showToast('✓ Backup berhasil dibuat (' + (sizeMb >= 1024 ? (sizeMb/1024).toFixed(1) + ' GB' : sizeMb + ' MB') + ')', 'success');
-        await logActivity('Backup dibuat', name, '💾', 'success');
-        await createNotification('Backup Selesai', name + ' siap di-restore kapan saja', '💾');
-        renderBackup();
-    } catch (e) {
-        showToast('Gagal buat backup: ' + (e.message || e), 'error');
-    }
-}
-
-function restoreBackup(id, name) {
-    confirmModal('Restore Backup?', 'Mengembalikan ke kondisi ' + name + '.\n\nSemua perubahan setelah waktu backup akan hilang.', async () => {
-        showToast('🔄 Restore dimulai. Estimasi 3-5 menit.', 'info', 6000);
-        await logActivity('Backup di-restore', name, '🔄', 'orange');
-        await createNotification('Restore Berjalan', 'Mengembalikan dari: ' + name, '🔄');
-    }, 'Restore');
-}
-
-async function deleteBackup(id) {
-    confirmModal('Hapus Backup?', 'Backup ini akan dihapus permanen.', async () => {
-        try {
-            const { error } = await sb.from('backups').delete().eq('id', id).eq('user_id', currentUser.id);
-            if (error) throw error;
-            showToast('✓ Backup dihapus', 'success');
-            await logActivity('Backup dihapus', 'Backup ID ' + id, '🗑️', 'danger');
-            renderBackup();
-        } catch (e) {
-            showToast('Gagal hapus: ' + (e.message || e), 'error');
-        }
-    }, 'Hapus');
+    const backups = [
+        { date: '07 Jun 2026, 02:00', size: '2.4 GB', type: 'Full', auto: true, status: 'success' },
+        { date: '06 Jun 2026, 02:00', size: '2.3 GB', type: 'Full', auto: true, status: 'success' },
+        { date: '05 Jun 2026, 02:00', size: '2.3 GB', type: 'Full', auto: true, status: 'success' },
+        { date: '04 Jun 2026, 14:30', size: '2.1 GB', type: 'Manual', auto: false, status: 'success' },
+        { date: '03 Jun 2026, 02:00', size: '2.0 GB', type: 'Incremental', auto: true, status: 'success' }
+    ];
+    el.innerHTML = backups.map(b => `
+        <div class="backup-card">
+            <div class="ic">${b.auto ? '🤖' : '🖱️'}</div>
+            <div class="info">
+                <h5>${b.type} Backup ${b.auto ? '(Auto)' : '(Manual)'}</h5>
+                <p>${b.date} · ${b.size} · <span class="status status-active">${b.status === 'success' ? '✓ Success' : 'Failed'}</span></p>
+            </div>
+            <div class="actions">
+                <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;" onclick="confirmModal('Restore Backup?', 'Mengembalikan ke kondisi backup tanggal ${b.date}.\\n\\nSemua perubahan setelah waktu ini akan hilang.', () => showToast('Restore dimulai. Estimasi 5 menit.', 'info'))">Restore</button>
+                <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px;" onclick="showToast('Download backup dimulai (${b.size})', 'success')">Download</button>
+            </div>
+        </div>
+    `).join('');
 }
 
 // === DASHBOARD ===
@@ -3236,7 +2781,6 @@ async function renderDashboard() {
         // Render new components (each guarded internally)
         renderNotifications();
         renderActivity();
-        renderResources();
         renderMiniChart('trafficChart', [42, 58, 47, 65, 71, 89, 95]);
     } catch (e) {
         console.error('[renderDashboard header]', e);
@@ -3412,9 +2956,6 @@ async function updateProfile() {
     document.getElementById('dashUserName').textContent = newName;
     document.getElementById('dashAvatar').textContent = newName.charAt(0).toUpperCase();
     showToast('✓ Profil berhasil diperbarui', 'success');
-    // Auto trigger
-    await logActivity('Profil diperbarui', 'Nama: ' + newName, '👤', 'purple');
-    await createNotification('Profil Diupdate', 'Informasi akun berhasil diperbarui', '👤');
 }
 
 async function showDetail(id) {
